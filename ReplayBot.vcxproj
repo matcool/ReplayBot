@@ -90,13 +90,14 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)cappuccino-sdk\incl\cocos2dx;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\kazmath\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)cappuccino-sdk\incl\extensions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)minhook\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\kazmath\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)cappuccino-sdk\incl\extensions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>$(SolutionDir)cappuccino-sdk\lib\cappuccino.lib;$(SolutionDir)cappuccino-sdk\lib\libExtensions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)cappuccino-sdk\lib\cappuccino.lib;$(SolutionDir)cappuccino-sdk\lib\libExtensions.lib;$(SolutionDir)minhook\lib\libMinHook-x86-v141-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +111,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)cappuccino-sdk\incl\cocos2dx;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\kazmath\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)cappuccino-sdk\incl\extensions;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -532,7 +534,13 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine-cocos2dx.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="PauseLayer.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PlayerObject.h" />
+    <ClInclude Include="PlayLayer.h" />
+    <ClInclude Include="Replay.h" />
+    <ClInclude Include="ReplaySystem.h" />
+    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\ccFPSImages.c" />
@@ -551,7 +559,12 @@
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\kazmath\src\vec3.c" />
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\kazmath\src\vec4.c" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="PauseLayer.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="PlayerObject.cpp" />
+    <ClCompile Include="PlayLayer.cpp" />
+    <ClCompile Include="Replay.cpp" />
+    <ClCompile Include="ReplaySystem.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

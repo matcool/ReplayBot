@@ -1,7 +1,25 @@
 #include "pch.h"
+#include "ReplaySystem.h"
+#include "PauseLayer.h"
+#include "PlayLayer.h"
+#include "PlayerObject.h"
 
 DWORD WINAPI my_thread(void* hModule) {
+    MH_Initialize();
     
+    AllocConsole();
+    SetConsoleTitleA("Console");
+    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+
+    auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
+
+    ReplaySystem::getInstance()->init(base);
+    PauseLayer::setup(base);
+    PlayLayer::setup(base);
+    PlayerObject::setup(base);
+
+    MH_EnableHook(MH_ALL_HOOKS);
+
     return 0;
 }
 
