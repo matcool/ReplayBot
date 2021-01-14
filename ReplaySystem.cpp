@@ -19,12 +19,14 @@ void ReplaySystem::toggleRecording() {
 }
 
 void ReplaySystem::togglePlaying() {
-	std::cout << "Toggled Playing" << std::endl;
-	playing = !playing;
-	recording = false;
-	PlayLayer::updateStatusLabel(playing ? "Playing" : "");
-	if (playing) {
-        curActionIndex = 0;
+	if (currentReplay) {
+		std::cout << "Toggled Playing" << std::endl;
+		playing = !playing;
+		recording = false;
+		PlayLayer::updateStatusLabel(playing ? "Playing" : "");
+		if (playing) {
+			curActionIndex = 0;
+		}
 	}
 }
 
@@ -50,7 +52,7 @@ void ReplaySystem::handlePlaying() {
 	if (curActionIndex < actions.size()) {
 		auto curAction = actions[curActionIndex];
 		if (*x >= curAction.x) {
-			*x = curAction.x;
+			// *x = curAction.x;
 			playAction(curAction);
 			curActionIndex++;
 			// kinda hacky but whatever
@@ -66,5 +68,17 @@ void ReplaySystem::handlePlaying() {
 	}
 	else {
 		togglePlaying();
+	}
+}
+
+// TODO!!!! support unicode paths
+
+void ReplaySystem::loadReplay(const char* path) {
+	currentReplay = std::make_shared<Replay>(path);
+}
+
+void ReplaySystem::saveReplay(const char* path) {
+	if (currentReplay) {
+		currentReplay->save(path);
 	}
 }

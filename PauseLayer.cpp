@@ -17,6 +17,7 @@ void __fastcall PauseLayer::initHook(CCLayer* self, void*) {
     init(self);
 
     auto sprite = CCSprite::create("GJ_button_01.png");
+    auto sprite2 = CCSprite::create("GJ_button_02.png");
     auto recordBtn = CCMenuItemSpriteExtra::create(sprite, sprite, self, menu_selector(PauseLayer::Callbacks::recordBtn));
     recordBtn->setScale(0.6f);
 
@@ -34,12 +35,38 @@ void __fastcall PauseLayer::initHook(CCLayer* self, void*) {
     playBtn->setPositionY(-30.f);
     playLabel->setPositionY(-30.f);
 
+    auto loadBtn = CCMenuItemSpriteExtra::create(sprite2, sprite2, self, menu_selector(PauseLayer::Callbacks::loadBtn));
+    loadBtn->setScale(0.6f);
+
+    auto loadLabel = CCLabelBMFont::create("Load", "bigFont.fnt");
+    loadLabel->setScale(0.5f);
+    loadLabel->setPositionX(15.f + loadLabel->getScaledContentSize().width / 2.f);
+
+    loadBtn->setPositionY(-80.f);
+    loadLabel->setPositionY(-80.f);
+
+    auto saveBtn = CCMenuItemSpriteExtra::create(sprite2, sprite2, self, menu_selector(PauseLayer::Callbacks::saveBtn));
+    saveBtn->setScale(0.6f);
+
+    auto saveLabel = CCLabelBMFont::create("Save", "bigFont.fnt");
+    saveLabel->setScale(0.5f);
+    saveLabel->setPositionX(15.f + saveLabel->getScaledContentSize().width / 2.f);
+
+    saveBtn->setPositionY(-110.f);
+    saveLabel->setPositionY(-110.f);
+
     auto menu = CCMenu::create();
     menu->addChild(recordBtn);
     menu->addChild(recordLabel);
 
     menu->addChild(playBtn);
     menu->addChild(playLabel);
+
+    menu->addChild(loadBtn);
+    menu->addChild(loadLabel);
+
+    menu->addChild(saveBtn);
+    menu->addChild(saveLabel);
 
     menu->setPosition(25, winSize.height - 40.f);
 
@@ -52,4 +79,36 @@ void PauseLayer::Callbacks::recordBtn(CCObject*) {
 
 void PauseLayer::Callbacks::playBtn(CCObject*) {
     ReplaySystem::getInstance()->togglePlaying();
+}
+
+void PauseLayer::Callbacks::loadBtn(CCObject*) {
+    OPENFILENAMEA info;
+    ZeroMemory(&info, sizeof info);
+    CHAR fileName[MAX_PATH] = "";
+    info.lStructSize = sizeof info;
+    info.hwndOwner = NULL;
+    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+    info.lpstrFile = fileName;
+    info.nMaxFile = MAX_PATH;
+    info.lpstrDefExt = "dat";
+    if (GetOpenFileNameA(&info)) {
+        std::cout << "file: " << info.lpstrFile << std::endl;
+        ReplaySystem::getInstance()->loadReplay(info.lpstrFile);
+    }
+}
+
+void PauseLayer::Callbacks::saveBtn(CCObject*) {
+    OPENFILENAMEA info;
+    ZeroMemory(&info, sizeof info);
+    CHAR fileName[MAX_PATH] = "";
+    info.lStructSize = sizeof info;
+    info.hwndOwner = NULL;
+    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+    info.lpstrFile = fileName;
+    info.nMaxFile = MAX_PATH;
+    info.lpstrDefExt = "dat";
+    if (GetSaveFileNameA(&info)) {
+        std::cout << "file: " << info.lpstrFile << std::endl;
+        ReplaySystem::getInstance()->saveReplay(info.lpstrFile);
+    }
 }

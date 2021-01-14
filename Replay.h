@@ -12,6 +12,7 @@ class Replay {
 	float fps;
 public:
 	Replay(float fps);
+	Replay(const char* path);
 
 	float getFPS() {
 		return fps;
@@ -23,4 +24,7 @@ public:
 	std::vector<Action> getActions() {
 		return actions;
 	}
+
+	void save(const char* path);
+	//static Replay load(const char* path);
 };

@@ -26,6 +26,8 @@ public:
 	std::shared_ptr<Replay> getCurrentReplay() {
 		return currentReplay;
 	}
+	void loadReplay(const char* path);
+	void saveReplay(const char* path);
 
 	void toggleRecording();
 	void togglePlaying();

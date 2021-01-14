@@ -13,5 +13,7 @@ namespace PauseLayer {
 	public:
 		void recordBtn(CCObject*);
 		void playBtn(CCObject*);
+		void loadBtn(CCObject*);
+		void saveBtn(CCObject*);
 	};
 }
