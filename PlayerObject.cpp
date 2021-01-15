@@ -28,10 +28,16 @@ void handler(void* self, bool hold) {
 
 void __fastcall PlayerObject::pushButtonHook(void* self, void*, void* PlayerButton) {
     handler(self, true);
+    if (ReplaySystem::getInstance()->isPlaying()) {
+        return;
+    }
     pushButton(self, PlayerButton);
 }
 
 void __fastcall PlayerObject::releaseButtonHook(void* self, void*, void* PlayerButton) {
     handler(self, false);
+    if (ReplaySystem::getInstance()->isPlaying()) {
+        return;
+    }
     releaseButton(self, PlayerButton);
 }
