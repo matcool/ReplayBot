@@ -33,7 +33,7 @@ void ReplaySystem::togglePlaying() {
 void ReplaySystem::handleRecording() {
 	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
 	if (*x < lastPlayerX) {
-		std::cout << "Player died at " << *x << std::endl;
+		std::cout << "Player died at " << lastPlayerX << std::endl;
 		currentReplay->removeActionsAfterX(*x);
 	}
 	lastPlayerX = *x;
