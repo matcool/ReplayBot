@@ -91,12 +91,11 @@ void PauseLayer::Callbacks::loadBtn(CCObject*) {
     CHAR fileName[MAX_PATH] = "";
     info.lStructSize = sizeof info;
     info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
     info.lpstrFile = fileName;
     info.nMaxFile = MAX_PATH;
-    info.lpstrDefExt = "dat";
     if (GetOpenFileNameA(&info)) {
-        std::cout << "file: " << info.lpstrFile << std::endl;
+        std::cout << "Loading file: " << info.lpstrFile << std::endl;
         ReplaySystem::getInstance()->loadReplay(info.lpstrFile);
     }
 }
@@ -107,12 +106,12 @@ void PauseLayer::Callbacks::saveBtn(CCObject*) {
     CHAR fileName[MAX_PATH] = "";
     info.lStructSize = sizeof info;
     info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY;
+    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
     info.lpstrFile = fileName;
     info.nMaxFile = MAX_PATH;
-    info.lpstrDefExt = "dat";
+    info.lpstrDefExt = "replay";
     if (GetSaveFileNameA(&info)) {
-        std::cout << "file: " << info.lpstrFile << std::endl;
+        std::cout << "Saving file: " << info.lpstrFile << std::endl;
         ReplaySystem::getInstance()->saveReplay(info.lpstrFile);
     }
 }
