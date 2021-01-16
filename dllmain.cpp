@@ -4,12 +4,29 @@
 #include "PlayLayer.h"
 #include "PlayerObject.h"
 
+void readInput(HMODULE hModule) {
+    for (std::string line; std::getline(std::cin, line);) {
+        if (line == "exit") {
+            auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
+            PauseLayer::unload(base);
+            PlayLayer::unload(base);
+            PlayerObject::unload(base);
+            fclose(stdout);
+            fclose(stdin);
+            FreeConsole();
+            FreeLibraryAndExitThread(hModule, 0);
+            break;
+        }
+    }
+}
+
 DWORD WINAPI my_thread(void* hModule) {
     MH_Initialize();
     
     AllocConsole();
     SetConsoleTitleA("Console");
     freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+    freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r", stdin);
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
@@ -19,6 +36,8 @@ DWORD WINAPI my_thread(void* hModule) {
     PlayerObject::setup(base);
 
     MH_EnableHook(MH_ALL_HOOKS);
+
+    readInput(reinterpret_cast<HMODULE>(hModule));
 
     return 0;
 }

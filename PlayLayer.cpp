@@ -21,6 +21,12 @@ void PlayLayer::setup(uintptr_t base) {
     );
 }
 
+void PlayLayer::unload(uintptr_t base) {
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x01FB780));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x2029C0));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FD3D0));
+}
+
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
     PlayLayer::self = self;
     init(self, GJLevel);

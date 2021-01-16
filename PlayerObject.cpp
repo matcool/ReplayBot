@@ -15,6 +15,11 @@ void PlayerObject::setup(uintptr_t base) {
     );
 }
 
+void PlayerObject::unload(uintptr_t base) {
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1F4E40));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1F4F70));
+}
+
 void handler(void* self, bool hold) {
     // maybe move all this logic to ReplaySystem?
     auto rs = ReplaySystem::getInstance();
@@ -22,6 +27,7 @@ void handler(void* self, bool hold) {
         auto selfAddress = reinterpret_cast<uintptr_t>(self);
         auto x = reinterpret_cast<float*>(selfAddress + 0x67c);
         auto player2 = PlayLayer::getPlayer2();
+        // std::cout << "Player@" << std::hex << self << " (" << (selfAddress == player2 ? "2" : "1") << ") "  << (hold ? "held" : "rele") << " at " << *x << std::endl;
         rs->getCurrentReplay()->addAction({ *x, hold, selfAddress == player2 });
     }
 }

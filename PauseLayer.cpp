@@ -10,6 +10,10 @@ void PauseLayer::setup(uintptr_t base) {
     );
 }
 
+void PauseLayer::unload(uintptr_t base) {
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E4620));
+}
+
 void __fastcall PauseLayer::initHook(CCLayer* self, void*) {
     auto director = CCDirector::sharedDirector();
     auto winSize = director->getWinSize();

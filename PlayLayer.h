@@ -5,6 +5,7 @@ using namespace cocos2d;
 
 namespace PlayLayer {
 	void setup(uintptr_t base);
+	void unload(uintptr_t base);
 	
 	constexpr int StatusLabelTag = 666;
 	inline CCLayer* self;
