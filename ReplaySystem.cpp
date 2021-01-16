@@ -65,20 +65,11 @@ void ReplaySystem::handlePlaying() {
 	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
 	auto actions = currentReplay->getActions();
 	if (curActionIndex < actions.size()) {
-		auto curAction = actions[curActionIndex];
-		if (*x >= curAction.x) {
-			// *x = curAction.x;
-			// std::cout << "running action at x: " << *x << std::endl;
+		Action curAction;
+		// while loop since up to 4 actions can happen in the same frame
+		while (curActionIndex < actions.size() && *x >= (curAction = actions[curActionIndex]).x) {
 			playAction(curAction);
-			curActionIndex++;
-			// check if next action has the same x (dual mode)
-			if (curActionIndex < actions.size()) {
-				auto nextAction = actions[curActionIndex];
-				if (nextAction.x == curAction.x) {
-					playAction(nextAction);
-					curActionIndex++;
-				}
-			}
+			++curActionIndex;
 		}
 	}
 	else {
