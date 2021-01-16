@@ -14,7 +14,7 @@ void ReplaySystem::toggleRecording() {
 	playing = false;
 	PlayLayer::updateStatusLabel(recording ? "Recording" : "");
 	if (recording) {
-		currentReplay = std::make_shared<Replay>(120.f);
+		currentReplay = std::make_shared<Replay>(defaultFPS);
 	}
 }
 

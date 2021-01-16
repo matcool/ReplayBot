@@ -17,6 +17,11 @@ void readInput(HMODULE hModule) {
             FreeLibraryAndExitThread(hModule, 0);
             break;
         }
+        else if (line.rfind("fps ", 0) == 0) {
+            auto fps = std::stoi(line.substr(4));
+            std::cout << "Setting fps to " << fps << std::endl;
+            ReplaySystem::getInstance()->setDefaultFPS(fps);
+        }
     }
 }
 
@@ -30,12 +35,17 @@ DWORD WINAPI my_thread(void* hModule) {
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
-    ReplaySystem::getInstance()->init(base);
+    auto rs = ReplaySystem::getInstance();
+    rs->init(base);
     PauseLayer::setup(base);
     PlayLayer::setup(base);
     PlayerObject::setup(base);
 
     MH_EnableHook(MH_ALL_HOOKS);
+
+    std::cout << "ReplayBot loaded." << std::endl;
+    std::cout << "FPS is set to " << rs->getDefaultFPS() << std::endl;
+    std::cout << "To change it type in `fps (number)`" << std::endl;
 
     readInput(reinterpret_cast<HMODULE>(hModule));
 

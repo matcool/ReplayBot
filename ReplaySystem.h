@@ -13,6 +13,7 @@ class ReplaySystem {
 	float lastPlayerX = 0.f;
 	bool playing = false;
 	std::shared_ptr<Replay> currentReplay;
+	float defaultFPS = 120.f;
 
 	size_t curActionIndex = 0;
 public:
@@ -37,6 +38,14 @@ public:
 	}
 	bool isPlaying() {
 		return playing;
+	}
+
+	float getDefaultFPS() {
+		return defaultFPS;
+	}
+
+	void setDefaultFPS(float fps) {
+		defaultFPS = fps;
 	}
 
 	void handleRecording();
