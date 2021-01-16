@@ -21,6 +21,9 @@ namespace PlayLayer {
 	inline void*(__thiscall* levelComplete)(CCLayer* self);
 	void* __fastcall levelCompleteHook(CCLayer* self, void*);
 
+	inline void* (__thiscall* onQuit)(CCLayer* self);
+	void* __fastcall onQuitHook(CCLayer* self, void*);
+
 	uintptr_t getPlayer();
 	uintptr_t getPlayer2();
 };

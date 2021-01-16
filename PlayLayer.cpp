@@ -5,7 +5,7 @@
 
 void PlayLayer::setup(uintptr_t base) {
     MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x01FB780),
+        reinterpret_cast<void*>(base + 0x1FB780),
         PlayLayer::initHook,
         reinterpret_cast<void**>(&PlayLayer::init)
     );
@@ -19,12 +19,18 @@ void PlayLayer::setup(uintptr_t base) {
         PlayLayer::levelCompleteHook,
         reinterpret_cast<void**>(&PlayLayer::levelComplete)
     );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20D810),
+        PlayLayer::onQuitHook,
+        reinterpret_cast<void**>(&PlayLayer::onQuit)
+    );
 }
 
 void PlayLayer::unload(uintptr_t base) {
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x01FB780));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FB780));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x2029C0));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FD3D0));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D810));
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
@@ -69,6 +75,19 @@ void* __fastcall PlayLayer::levelCompleteHook(CCLayer* self, void*) {
         rs->toggleRecording();
     }
     return levelComplete(self);
+}
+
+void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
+    auto rs = ReplaySystem::getInstance();
+    if (rs->isRecording()) {
+        std::cout << "Exited out of level, stopping recording" << std::endl;
+        rs->toggleRecording();
+    }
+    if (rs->isPlaying()) {
+        std::cout << "Exited out of level, stopped playing" << std::endl;
+        rs->toggleRecording();
+    }
+    return onQuit(self);
 }
 
 uintptr_t PlayLayer::getPlayer() {
