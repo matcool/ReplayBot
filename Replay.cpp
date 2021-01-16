@@ -32,7 +32,7 @@ void Replay::save(const char* path) {
 	std::ofstream outfile;
 	outfile.open(path, std::ios::binary | std::ios::out);
 	binWrite(&outfile, fps);
-	std::cout << "n actions " << actions.size() << std::endl;
+	// std::cout << "n actions " << actions.size() << std::endl;
 	for (auto& action : actions) {
 		binWrite(&outfile, action.x);
 		binWrite(&outfile, action.hold);
@@ -56,4 +56,5 @@ Replay::Replay(const char* path) {
 		this->actions.pop_back();
 	}
 	infile.close();
+	std::cout << "Replay loaded with fps=" << this->fps << std::endl;
 }
