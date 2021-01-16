@@ -47,11 +47,13 @@ Replay::Replay(const char* path) {
 	this->fps = binRead<float>(&infile);
 	while (!infile.eof()) {
 		Action action = { binRead<float>(&infile), binRead<bool>(&infile), binRead<bool>(&infile) };
-		std::cout << "read action x=" << action.x << " hold=" << action.hold << " player2=" << action.player2 << std::endl;
+		// std::cout << "read action x=" << action.x << " hold=" << action.hold << " player2=" << action.player2 << std::endl;
 		this->actions.push_back(action);
 	}
-	// for some reason it always reads garbage data at the end
-	// FIX
-	this->actions.pop_back();
+	// FIX: for some reason it always reads garbage data at the end
+	if (this->actions.back().hold > 1) {
+		std::cout << "Last action had hold=" << this->actions.back().hold << ", removing it" << std::endl;
+		this->actions.pop_back();
+	}
 	infile.close();
 }
