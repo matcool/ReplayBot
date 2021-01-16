@@ -85,7 +85,7 @@ void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
     }
     if (rs->isPlaying()) {
         std::cout << "Exited out of level, stopped playing" << std::endl;
-        rs->toggleRecording();
+        rs->togglePlaying();
     }
     return onQuit(self);
 }
