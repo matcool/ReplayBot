@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from struct import pack, unpack
 import sys
 import os
+import json
 
 @dataclass
 class Action:
@@ -44,6 +45,17 @@ def parse_zbot(data: bytes) -> Replay:
             actions.append(Action(x, hold == 0x31, player_1 != 0x31))
     return Replay(fps, actions)
 
+def parse_ybot(data: bytes) -> Replay:
+    data = json.loads(data)
+    levels = list(data.keys())
+    level = input(f'Choose a level {levels}: ')
+    macro = data[level]
+    fps = 1 / macro['delta_override']
+    actions = []
+    for inst in macro['instructions']:
+        actions.append(Action(inst['x'], inst['press'], inst['p2']))
+    return Replay(fps, actions)
+
 def dump_replaybot(replay: Replay) -> bytearray:
     data = bytearray()
     data.extend(pack('f', replay.fps))
@@ -77,44 +89,50 @@ def dump_txt(replay: Replay) -> str:
         final += f'{action.x} {int(action.hold)} {int(action.player_2)}\n'
     return final[:-1]
 
-if len(sys.argv) != 4:
-    print('''\
-Usage: python converter.py (from) format (to)
-format can be either zbot, replaybot or txt
+FORMATS = {'txt', 'replaybot', 'zbot', 'ybot'}
+
+if len(sys.argv) != 5:
+    print(f'''\
+Usage: python converter.py format (from) format (to)
+format can be either {", ".join(FORMATS)}
 Example:
   Converts from zBot to ReplayBot
-  python converter.py "Sonic Wave.zbot" replaybot "Sonic Wave.replay"
+  python converter.py zbot "Sonic Wave.zbot" replaybot "Sonic Wave.replay"
 
   Converts from zBot to txt
-  python converter.py "Tartarus.zbot" txt "tartarus.txt"
+  python converter.py zbot "Tartarus.zbot" txt "tartarus.txt"
 ''')
     exit(1)
 
-if os.path.exists(sys.argv[3]):
-    print(f'{sys.argv[3]} already exists')
+if os.path.exists(sys.argv[4]):
+    print(f'{sys.argv[4]} already exists')
     exit(1)
 
-FORMATS = {'txt', 'replaybot', 'zbot'}
+from_format = sys.argv[1]
 
-from_format = os.path.splitext(sys.argv[1])[1][1:]
+to = sys.argv[3]
 
-to = sys.argv[2]
-
-if to not in FORMATS:
+if to not in FORMATS or from_format not in FORMATS:
     print(f'format can only be {FORMATS}')
     exit(1)
 
-with open(sys.argv[1], 'rb') as file:
+if to == 'ybot':
+    print('cant convert to ybot (yet)')
+    exit(1)
+
+with open(sys.argv[2], 'rb') as file:
     data = file.read()
 
 if from_format == 'zbot':
     replay = parse_zbot(data)
 elif from_format == 'txt':
     replay = parse_txt(data)
-else:
+elif from_format == 'ybot':
+    replay = parse_ybot(data)
+elif from_format == 'replaybot':
     replay = parse_replaybot(data)
 
-with open(sys.argv[3], 'wb') as file:
+with open(sys.argv[4], 'wb') as file:
     if to == 'zbot':
         file.write(dump_zbot(replay))
     elif to == 'txt':

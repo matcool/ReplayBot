@@ -22,9 +22,9 @@ Some sample replays are available on the `replays/` folder.
 
 ```bash
 # from replaybot to plain text
-python converter.py myreplay.replay txt myreplay.txt
+python converter.py replaybot myreplay.replay txt myreplay.txt
 # txt back to replaybot
-python converter.py myreplay.txt replaybot myreplay.replay
+python converter.py txt myreplay.txt replaybot myreplay.replay
 ```
 
 ## TODO
