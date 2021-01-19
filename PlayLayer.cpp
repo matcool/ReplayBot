@@ -34,6 +34,16 @@ void PlayLayer::setup(uintptr_t base) {
         releaseButtonHook,
         reinterpret_cast<void**>(&releaseButton)
     );
+
+    auto handle = GetModuleHandleA("libcocos2d.dll");
+    auto address = GetProcAddress(handle, "?update@CCScheduler@cocos2d@@UAEXM@Z");
+    schUpdateAddress = reinterpret_cast<void*>(address);
+
+    MH_CreateHook(
+        schUpdateAddress,
+        schUpdateHook,
+        reinterpret_cast<void**>(&schUpdate)
+    );
 }
 
 void PlayLayer::unload(uintptr_t base) {
@@ -43,6 +53,7 @@ void PlayLayer::unload(uintptr_t base) {
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D810));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x111500));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x111660));
+    MH_RemoveHook(schUpdateAddress);
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
@@ -66,11 +77,17 @@ void PlayLayer::updateStatusLabel(const char* text) {
     label->setPosition({ 10.f + label->getContentSize().width / 2.f, 10.f });
 }
 
-void __fastcall PlayLayer::updateHook(CCLayer* self, void*, float dt) {
+void __fastcall PlayLayer::schUpdateHook(CCScheduler* self, void*, float dt) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying() || rs->isRecording()) {
-        dt = 1.f / rs->getCurrentReplay()->getFPS();
+        float fps = rs->getCurrentReplay()->getFPS();
+        dt = 1.f / fps;
     }
+    return schUpdate(self, dt);
+}
+
+void __fastcall PlayLayer::updateHook(CCLayer* self, void*, float dt) {
+    auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) {
         rs->handlePlaying();
     }

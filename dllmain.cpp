@@ -26,6 +26,11 @@ void readInput(HMODULE hModule) {
             std::cout << "Setting fps to " << fps << std::endl;
             ReplaySystem::getInstance()->setDefaultFPS(fps);
         }
+        else if (line.rfind("speed ", 0) == 0) {
+            auto speed = std::stof(line.substr(6));
+            std::cout << "speedhack " << speed << std::endl;
+            CCDirector::sharedDirector()->getScheduler()->setTimeScale(speed);
+        }
     }
 }
 

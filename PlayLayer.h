@@ -19,6 +19,11 @@ namespace PlayLayer {
 	inline void(__thiscall* update)(CCLayer* self, float dt);
 	void __fastcall updateHook(CCLayer* self, void*, float dt);
 
+	inline void* schUpdateAddress;
+
+	inline void(__thiscall* schUpdate)(CCScheduler* self, float dt);
+	void __fastcall schUpdateHook(CCScheduler* self, void*, float dt);
+
 	inline void*(__thiscall* levelComplete)(CCLayer* self);
 	void* __fastcall levelCompleteHook(CCLayer* self, void*);
 
