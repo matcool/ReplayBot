@@ -1,9 +1,9 @@
 #include "PlayLayer.h"
 #include "ReplaySystem.h"
-#include "PlayerObject.h"
 #include "utils.hpp"
 
 void PlayLayer::setup(uintptr_t base) {
+    PlayLayer::base = base;
     MH_CreateHook(
         reinterpret_cast<void*>(base + 0x1FB780),
         PlayLayer::initHook,
@@ -24,6 +24,16 @@ void PlayLayer::setup(uintptr_t base) {
         PlayLayer::onQuitHook,
         reinterpret_cast<void**>(&PlayLayer::onQuit)
     );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x111500),
+        pushButtonHook,
+        reinterpret_cast<void**>(&pushButton)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x111660),
+        releaseButtonHook,
+        reinterpret_cast<void**>(&releaseButton)
+    );
 }
 
 void PlayLayer::unload(uintptr_t base) {
@@ -31,6 +41,8 @@ void PlayLayer::unload(uintptr_t base) {
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x2029C0));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FD3D0));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D810));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x111500));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x111660));
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
@@ -88,6 +100,25 @@ void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
         rs->togglePlaying();
     }
     return onQuit(self);
+}
+
+uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
+    auto rs = ReplaySystem::getInstance();
+    if (rs->isPlaying()) return 0;
+    rs->recordAction(true, button);
+    return pushButton(self, idk, button);
+}
+
+uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, bool button) {
+    auto rs = ReplaySystem::getInstance();
+    if (rs->isPlaying()) return 0;
+    rs->recordAction(false, button);
+    return releaseButton(self, idk, button);
+}
+
+// technically not in playlayer but who cares
+bool PlayLayer::is2Player() {
+    return *reinterpret_cast<bool*>(follow(follow(follow(base + 0x3222D0) + 0x164) + 0x22c) + 0xfa);
 }
 
 uintptr_t PlayLayer::getPlayer() {

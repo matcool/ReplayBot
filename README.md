@@ -4,7 +4,7 @@ A replay bot for Geometry Dash
 
 Demo Video:
 
-<a href="https://youtu.be/3fcRO_AswyU" target="_blank"><img src="https://i.ytimg.com/vi/3fcRO_AswyU/maxresdefault.jpg" width="640" height="360" /></a>
+<a href="https://youtu.be/3fcRO_AswyU" target="_blank"><img src="https://i.ytimg.com/vi/3fcRO_AswyU/maxresdefault.jpg" width="640" height="auto" /></a>
 
 ## Usage
 
@@ -16,8 +16,6 @@ To record a replay press the record button and restart the level. Recordings use
 
 Some sample replays are available on the `replays/` folder.
 
-*For the wasureta replay you'll need to type `2phackfix` into the console*
-
 ## Converter
 
 ```bash
@@ -28,9 +26,12 @@ python converter.py txt myreplay.txt replaybot myreplay.replay
 ```
 
 ## TODO
+- delta override is not entirely accurate (slowdown caused by delta override is not 100% accurate, for example the ground still moves at normal speed)
+- pausing can mess up a recording (pauselayer seems to directly call PlayerObject::pushButton, need to find where it does it)
+- some replays converted from zbot have broken duals (i blame fig)
 - support unicode save paths
 - (?) fix the practice mode inconsistencies (holding between attempts doesn't get added to actions, fix ship and ufo momentum not getting properly saved (idk how to do this))
-- (?) make it more consistent (sometimes it desyncs on duals)
+- (?) make it more consistent
 
 ## Credits
 @AndreNIH for [CappuccinoSDK](https://github.com/AndreNIH/CappuccinoSDK)

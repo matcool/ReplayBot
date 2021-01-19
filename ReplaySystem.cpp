@@ -1,6 +1,5 @@
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
-#include "PlayerObject.h"
 
 ReplaySystem* ReplaySystem::instance;
 
@@ -30,6 +29,13 @@ void ReplaySystem::togglePlaying() {
 	}
 }
 
+void ReplaySystem::recordAction(bool hold, bool player1) {
+	if (recording) {
+		auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67c);
+		currentReplay->addAction({ *x, hold, PlayLayer::is2Player() && !player1 });
+	}
+}
+
 void ReplaySystem::handleRecording() {
 	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
 	if (*x < lastPlayerX) {
@@ -40,25 +46,10 @@ void ReplaySystem::handleRecording() {
 }
 
 void ReplaySystem::playAction(Action action) {
-	// std::cout << "played: " << action.hold << " " << action.player2 << " " << action.x << std::endl;
-	if (dualModeHackyFix) {
-		// ignore player 2 inputs
-		if (action.player2) return;
-		auto player1 = reinterpret_cast<void*>(PlayLayer::getPlayer());
-		auto player2 = reinterpret_cast<void*>(PlayLayer::getPlayer2());
-		if (action.hold) {
-			PlayerObject::pushButton(player1, 0);
-			PlayerObject::pushButton(player2, 0);
-		} else {
-			PlayerObject::releaseButton(player1, 0);
-			PlayerObject::releaseButton(player2, 0);
-		}
-	}
-	else {
-		auto player = reinterpret_cast<void*>(action.player2 ? PlayLayer::getPlayer2() : PlayLayer::getPlayer());
-		if (action.hold) PlayerObject::pushButton(player, 0);
-		else PlayerObject::releaseButton(player, 0);
-	}
+	auto layer = PlayLayer::self;
+	// if (!PlayLayer::is2Player() && action.player2) return;
+	if (action.hold) PlayLayer::pushButton(layer, 0, !action.player2);
+	else PlayLayer::releaseButton(layer, 0, !action.player2);
 }
 
 void ReplaySystem::handlePlaying() {

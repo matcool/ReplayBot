@@ -17,12 +17,9 @@ void readInput(HMODULE hModule) {
             FreeLibraryAndExitThread(hModule, 0);
             break;
         }
-        else if (line == "2phackfix") {
-            auto on = ReplaySystem::getInstance()->toggleDualModeHackyFix();
-            std::cout << "Hacky fix for more accurate dual mode is now " << (on ? "ON" : "OFF") << std::endl;
-            if (on) {
-                std::cout << "2 player mode playback will no longer work with this on" << std::endl;
-            }
+        else if (line == "x") {
+            auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
+            std::cout << *x << std::endl;
         }
         else if (line.rfind("fps ", 0) == 0) {
             auto fps = std::stoi(line.substr(4));

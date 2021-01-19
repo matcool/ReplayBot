@@ -1,6 +1,7 @@
 #include "PauseLayer.h"
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
+#include "PlayerObject.h"
 
 void PauseLayer::setup(uintptr_t base) {
     MH_CreateHook(

@@ -14,7 +14,6 @@ class ReplaySystem {
 	bool playing = false;
 	std::shared_ptr<Replay> currentReplay;
 	float defaultFPS = 120.f;
-	bool dualModeHackyFix = false;
 
 	size_t curActionIndex = 0;
 public:
@@ -48,11 +47,8 @@ public:
 	void setDefaultFPS(float fps) {
 		defaultFPS = fps;
 	}
-	
-	bool toggleDualModeHackyFix() {
-		return (dualModeHackyFix = !dualModeHackyFix);
-	}
 
+	void recordAction(bool hold, bool player1);
 	void handleRecording();
 	void playAction(Action);
 	void handlePlaying();
