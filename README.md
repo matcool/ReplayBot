@@ -26,7 +26,6 @@ python converter.py txt myreplay.txt replaybot myreplay.replay
 ```
 
 ## TODO
-- delta override is not entirely accurate (slowdown caused by delta override is not 100% accurate, for example the ground still moves at normal speed)
 - pausing can mess up a recording (pauselayer seems to directly call PlayerObject::pushButton, need to find where it does it)
 - some replays converted from zbot have broken duals (i blame fig)
 - support unicode save paths
