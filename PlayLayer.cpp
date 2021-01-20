@@ -81,7 +81,8 @@ void __fastcall PlayLayer::schUpdateHook(CCScheduler* self, void*, float dt) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying() || rs->isRecording()) {
         float fps = rs->getCurrentReplay()->getFPS();
-        dt = 1.f / fps;
+        float speedhack = self->getTimeScale();
+        dt = 1.f / fps / speedhack;
     }
     return schUpdate(self, dt);
 }
