@@ -9,10 +9,24 @@ void PauseLayer::setup(uintptr_t base) {
         initHook,
         reinterpret_cast<void**>(&init)
     );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20D3C0),
+        onPauseHook,
+        reinterpret_cast<void**>(&onPause)
+    );
 }
 
 void PauseLayer::unload(uintptr_t base) {
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E4620));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D3C0));
+}
+
+// this is probably on PlayLayer but i dontcare
+void __fastcall PauseLayer::onPauseHook(void* self, void*, void* idk) {
+    if (ReplaySystem::getInstance()->isPlaying())
+        PlayerObject::preventInput = true;
+    onPause(self, idk);
+    PlayerObject::preventInput = false;
 }
 
 void __fastcall PauseLayer::initHook(CCLayer* self, void*) {
