@@ -26,7 +26,6 @@ python converter.py txt myreplay.txt replaybot myreplay.replay
 ```
 
 ## TODO
-- pausing can mess up playback (pauselayer seems to directly call PlayerObject::pushButton, need to find where it does it)
 - some replays converted from zbot have broken duals (i blame fig)
 - support unicode save paths
 - (?) fix the practice mode inconsistencies (holding between attempts doesn't get added to actions, fix ship and ufo momentum not getting properly saved (idk how to do this))
