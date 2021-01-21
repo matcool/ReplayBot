@@ -23,8 +23,11 @@ void PauseLayer::unload(uintptr_t base) {
 
 // this is probably on PlayLayer but i dontcare
 void __fastcall PauseLayer::onPauseHook(void* self, void*, void* idk) {
-    if (ReplaySystem::getInstance()->isPlaying())
+    auto rs = ReplaySystem::getInstance();
+    if (rs->isPlaying())
         PlayerObject::preventInput = true;
+    if (rs->isRecording())
+        rs->recordAction(false, true);
     onPause(self, idk);
     PlayerObject::preventInput = false;
 }

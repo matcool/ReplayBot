@@ -25,8 +25,6 @@ void __fastcall PlayerObject::pushButtonHook(void* self, void*, void* PlayerButt
 }
 
 void __fastcall PlayerObject::releaseButtonHook(void* self, void*, void* PlayerButton) {
-    // pausing calls this function directly for some reason??
-    // TODO: set preventInput to true on the function that calls this, doesnt seem to be on PauseLayer::init tho
     if (preventInput) return;
     releaseButton(self, PlayerButton);
 }
