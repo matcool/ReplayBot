@@ -23,7 +23,8 @@ struct Checkpoint {
 
 namespace PracticeFixes {
 	inline std::stack<Checkpoint> checkpoints;
-	// TODO: 2 player
+	// TODONT: 2 player
+	// nvm lmao gd itself doesnt do it
 	inline bool isHolding = false;
 
 	void applyCheckpoint();
