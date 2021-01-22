@@ -1,6 +1,7 @@
 #include "PlayLayer.h"
 #include "ReplaySystem.h"
 #include "utils.hpp"
+#include "PracticeFixes.h"
 
 void PlayLayer::setup(uintptr_t base) {
     PlayLayer::base = base;
@@ -44,6 +45,22 @@ void PlayLayer::setup(uintptr_t base) {
         schUpdateHook,
         reinterpret_cast<void**>(&schUpdate)
     );
+
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x25FB60),
+        markCheckpointHook,
+        reinterpret_cast<void**>(&markCheckpoint)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20B830),
+        removeLastCheckpointHook,
+        reinterpret_cast<void**>(&removeLastCheckpoint)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x1E60E0),
+        onEditorHook,
+        reinterpret_cast<void**>(&onEditor)
+    );
 }
 
 void PlayLayer::unload(uintptr_t base) {
@@ -54,6 +71,9 @@ void PlayLayer::unload(uintptr_t base) {
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x111500));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x111660));
     MH_RemoveHook(schUpdateAddress);
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x25FB60));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20B830));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E60E0));
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
@@ -107,7 +127,8 @@ void* __fastcall PlayLayer::levelCompleteHook(CCLayer* self, void*) {
     return levelComplete(self);
 }
 
-void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
+void exitLevel() {
+    PracticeFixes::clearCheckpoints();
     auto rs = ReplaySystem::getInstance();
     if (rs->isRecording()) {
         std::cout << "Exited out of level, stopping recording" << std::endl;
@@ -117,13 +138,23 @@ void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
         std::cout << "Exited out of level, stopped playing" << std::endl;
         rs->togglePlaying();
     }
+}
+
+void* __fastcall PlayLayer::onQuitHook(CCLayer* self, void*) {
+    exitLevel();
     return onQuit(self);
+}
+
+void* __fastcall PlayLayer::onEditorHook(CCLayer* self, void*, void* idk) {
+    exitLevel();
+    return onEditor(self, idk);
 }
 
 uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) return 0;
     rs->recordAction(true, button);
+    PracticeFixes::isHolding = true;
     return pushButton(self, idk, button);
 }
 
@@ -131,6 +162,7 @@ uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, 
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) return 0;
     rs->recordAction(false, button);
+    PracticeFixes::isHolding = false;
     return releaseButton(self, idk, button);
 }
 
@@ -146,4 +178,17 @@ uintptr_t PlayLayer::getPlayer() {
 uintptr_t PlayLayer::getPlayer2() {
     if (self) return follow(reinterpret_cast<uintptr_t>(self) + 0x228);
     return 0;
+}
+
+void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2) {
+    auto isDead = reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(PlayLayer::self) + 0x39C);
+    if (!*isDead) {
+        PracticeFixes::addCheckpoint();
+    }
+    return markCheckpoint(self, idk2);
+}
+
+void* __fastcall PlayLayer::removeLastCheckpointHook(CCLayer* self, void*) {
+    PracticeFixes::removeCheckpoint();
+    return removeLastCheckpoint(self);
 }

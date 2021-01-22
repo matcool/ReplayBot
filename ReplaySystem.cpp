@@ -1,5 +1,6 @@
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
+#include "PracticeFixes.h"
 
 ReplaySystem* ReplaySystem::instance;
 
@@ -39,8 +40,11 @@ void ReplaySystem::recordAction(bool hold, bool player1) {
 void ReplaySystem::handleRecording() {
 	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
 	if (*x < lastPlayerX) {
-		std::cout << "Player died at " << lastPlayerX << std::endl;
+		std::cout << "Player died at " << lastPlayerX << " " << PracticeFixes::isHolding << std::endl;
 		currentReplay->removeActionsAfterX(*x);
+		// TODO: 2 player 
+		recordAction(PracticeFixes::isHolding, true);
+		PracticeFixes::applyCheckpoint();
 	}
 	lastPlayerX = *x;
 }

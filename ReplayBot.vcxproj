@@ -538,6 +538,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerObject.h" />
     <ClInclude Include="PlayLayer.h" />
+    <ClInclude Include="PracticeFixes.h" />
     <ClInclude Include="Replay.h" />
     <ClInclude Include="ReplaySystem.h" />
     <ClInclude Include="utils.hpp" />
@@ -563,6 +564,7 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="PlayerObject.cpp" />
     <ClCompile Include="PlayLayer.cpp" />
+    <ClCompile Include="PracticeFixes.cpp" />
     <ClCompile Include="Replay.cpp" />
     <ClCompile Include="ReplaySystem.cpp" />
   </ItemGroup>

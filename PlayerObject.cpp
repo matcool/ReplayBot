@@ -28,3 +28,21 @@ void __fastcall PlayerObject::releaseButtonHook(void* self, void*, void* PlayerB
     if (preventInput) return;
     releaseButton(self, PlayerButton);
 }
+
+namespace PlayerObject {
+    float* getX(uintptr_t player) {
+        return reinterpret_cast<float*>(player + 0x67C);
+    }
+
+    float* getYAccel(uintptr_t player) {
+        return reinterpret_cast<float*>(player + 0x62C);
+    }
+
+    float* getRotation(uintptr_t player) {
+        return reinterpret_cast<float*>(player + 0x20);
+    }
+
+    float* getSpriteRotation(uintptr_t player) {
+        return reinterpret_cast<float*>(player + 0x24);
+    }
+}
