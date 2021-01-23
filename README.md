@@ -12,11 +12,14 @@ Replays are always stored in memory, to load one from a file click the load butt
 
 Once you have a replay in memory go to the level, press the play button and then the restart button.
 
-To record a replay press the record button and restart the level. Recordings use the default fps, to change it type `fps (number)` into the console (you can't change the fps while recording). You can record with practice mode but ship and ufo can desync very easily.
+To record a replay press the record button and restart the level. Recordings use the default fps, to change it type `fps (number)` into the console (you can't change the fps while recording).
+You can record with practice mode but sometimes it can still desync.
 
 Some sample replays are available on the `replays/` folder.
 
 ## Converter
+
+The macro converted has been made into its own [website](https://matcool.github.io/gd-macro-converter/)
 
 ```bash
 # from replaybot to plain text
@@ -26,9 +29,9 @@ python converter.py txt myreplay.txt replaybot myreplay.replay
 ```
 
 ## TODO
+- wasureta replay in `replays/` can randomly die at 26%, maybe the x pos gets unaligned? (i blame robtop)
 - some replays converted from zbot have broken duals (i blame fig)
 - support unicode save paths
-- (?) fix the practice mode inconsistencies (holding between attempts doesn't get added to actions, fix ship and ufo momentum not getting properly saved (idk how to do this))
 - (?) make it more consistent
 
 ## Credits
