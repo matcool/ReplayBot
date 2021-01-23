@@ -1,6 +1,7 @@
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
 #include "PracticeFixes.h"
+#include "GameManager.h"
 
 ReplaySystem* ReplaySystem::instance;
 
@@ -54,8 +55,9 @@ void ReplaySystem::handleRecording() {
 void ReplaySystem::playAction(Action action) {
 	auto layer = PlayLayer::self;
 	// if (!PlayLayer::is2Player() && action.player2) return;
-	if (action.hold) PlayLayer::pushButton(layer, 0, !action.player2);
-	else PlayLayer::releaseButton(layer, 0, !action.player2);
+	auto flip = PlayLayer::is2Player() && GameManager::is2PFlipped();
+	if (action.hold) PlayLayer::pushButton(layer, 0, !action.player2 ^ flip);
+	else PlayLayer::releaseButton(layer, 0, !action.player2 ^ flip);
 }
 
 void ReplaySystem::handlePlaying() {

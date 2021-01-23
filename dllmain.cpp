@@ -3,6 +3,7 @@
 #include "PauseLayer.h"
 #include "PlayLayer.h"
 #include "PlayerObject.h"
+#include "GameManager.h"
 
 void readInput(HMODULE hModule) {
     for (std::string line; std::getline(std::cin, line);) {
@@ -49,6 +50,7 @@ DWORD WINAPI my_thread(void* hModule) {
     PauseLayer::setup(base);
     PlayLayer::setup(base);
     PlayerObject::setup(base);
+    GameManager::setup(base);
 
     MH_EnableHook(MH_ALL_HOOKS);
 

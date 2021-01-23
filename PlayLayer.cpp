@@ -2,6 +2,7 @@
 #include "ReplaySystem.h"
 #include "utils.hpp"
 #include "PracticeFixes.h"
+#include "GameManager.h"
 
 void PlayLayer::setup(uintptr_t base) {
     PlayLayer::base = base;
@@ -153,7 +154,9 @@ void* __fastcall PlayLayer::onEditorHook(CCLayer* self, void*, void* idk) {
 uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) return 0;
-    rs->recordAction(true, button);
+    // TODO: somehow put this in recordAction without messing up other stuff
+    auto flip = is2Player() && GameManager::is2PFlipped();
+    rs->recordAction(true, button ^ flip);
     PracticeFixes::isHolding = true;
     return pushButton(self, idk, button);
 }
@@ -161,7 +164,9 @@ uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, boo
 uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, bool button) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) return 0;
-    rs->recordAction(false, button);
+    // TODO: somehow put this in recordAction without messing up other stuff
+    auto flip = is2Player() && GameManager::is2PFlipped();
+    rs->recordAction(false, button ^ flip);
     PracticeFixes::isHolding = false;
     return releaseButton(self, idk, button);
 }
