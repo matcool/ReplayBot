@@ -42,8 +42,10 @@ void ReplaySystem::handleRecording() {
 	if (*x < lastPlayerX) {
 		std::cout << "Player died at " << lastPlayerX << " " << PracticeFixes::isHolding << std::endl;
 		currentReplay->removeActionsAfterX(*x);
-		// TODO: 2 player 
 		recordAction(PracticeFixes::isHolding, true);
+		// you cant "buffer hold" player 2
+		if (PlayLayer::is2Player())
+			recordAction(false, false);
 		PracticeFixes::applyCheckpoint();
 	}
 	lastPlayerX = *x;
