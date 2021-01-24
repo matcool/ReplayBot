@@ -152,22 +152,27 @@ void* __fastcall PlayLayer::onEditorHook(CCLayer* self, void*, void* idk) {
 }
 
 uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
-    auto rs = ReplaySystem::getInstance();
-    if (rs->isPlaying()) return 0;
-    // TODO: somehow put this in recordAction without messing up other stuff
-    auto flip = is2Player() && GameManager::is2PFlipped();
-    rs->recordAction(true, button ^ flip);
-    PracticeFixes::isHolding = true;
+    // make sure it's in a play layer
+    if (getSelf()) {
+        auto rs = ReplaySystem::getInstance();
+        if (rs->isPlaying()) return 0;
+        // TODO: somehow put this in recordAction without messing up other stuff
+        auto flip = is2Player() && GameManager::is2PFlipped();
+        rs->recordAction(true, button ^ flip);
+        PracticeFixes::isHolding = true;
+    }
     return pushButton(self, idk, button);
 }
 
 uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, bool button) {
-    auto rs = ReplaySystem::getInstance();
-    if (rs->isPlaying()) return 0;
-    // TODO: somehow put this in recordAction without messing up other stuff
-    auto flip = is2Player() && GameManager::is2PFlipped();
-    rs->recordAction(false, button ^ flip);
-    PracticeFixes::isHolding = false;
+    if (getSelf()) {
+        auto rs = ReplaySystem::getInstance();
+        if (rs->isPlaying()) return 0;
+        // TODO: somehow put this in recordAction without messing up other stuff
+        auto flip = is2Player() && GameManager::is2PFlipped();
+        rs->recordAction(false, button ^ flip);
+        PracticeFixes::isHolding = false;
+    }
     return releaseButton(self, idk, button);
 }
 
@@ -183,6 +188,10 @@ uintptr_t PlayLayer::getPlayer() {
 uintptr_t PlayLayer::getPlayer2() {
     if (self) return follow(reinterpret_cast<uintptr_t>(self) + 0x228);
     return 0;
+}
+
+uintptr_t PlayLayer::getSelf() {
+    return follow(follow(base + 0x3222D0) + 0x164);
 }
 
 void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2) {
