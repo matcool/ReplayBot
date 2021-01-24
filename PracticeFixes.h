@@ -3,7 +3,7 @@
 #include "PlayerObject.h"
 
 struct CheckpointData {
-	float yAccel;
+	double yAccel;
 	float rotation;
 	float spriteRotation;
 	static CheckpointData fromPlayer(uintptr_t player) {

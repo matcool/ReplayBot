@@ -34,8 +34,8 @@ namespace PlayerObject {
         return reinterpret_cast<float*>(player + 0x67C);
     }
 
-    float* getYAccel(uintptr_t player) {
-        return reinterpret_cast<float*>(player + 0x62C);
+    double* getYAccel(uintptr_t player) {
+        return reinterpret_cast<double*>(player + 0x628);
     }
 
     float* getRotation(uintptr_t player) {
