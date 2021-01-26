@@ -41,7 +41,6 @@ void ReplaySystem::recordAction(bool hold, bool player1) {
 void ReplaySystem::onReset() {
 	if (recording) {
 		auto x = PlayerObject::getX(PlayLayer::getPlayer());
-		std::cout << "Lol u died " << *x << std::endl;
 		currentReplay->removeActionsAfterX(*x);
 		recordAction(PracticeFixes::isHolding, true);
 		// you cant "buffer hold" player 2
