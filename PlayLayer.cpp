@@ -62,6 +62,11 @@ void PlayLayer::setup(uintptr_t base) {
         onEditorHook,
         reinterpret_cast<void**>(&onEditor)
     );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20BF00),
+        resetLevelHook,
+        reinterpret_cast<void**>(&resetLevel)
+    );
 }
 
 void PlayLayer::unload(uintptr_t base) {
@@ -75,6 +80,7 @@ void PlayLayer::unload(uintptr_t base) {
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x25FB60));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x20B830));
     MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E60E0));
+    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20BF00));
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
@@ -112,9 +118,6 @@ void __fastcall PlayLayer::updateHook(CCLayer* self, void*, float dt) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying()) {
         rs->handlePlaying();
-    }
-    if (rs->isRecording()) {
-        rs->handleRecording();
     }
     update(self, dt);
 }
@@ -205,4 +208,10 @@ void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2)
 void* __fastcall PlayLayer::removeLastCheckpointHook(CCLayer* self, void*) {
     PracticeFixes::removeCheckpoint();
     return removeLastCheckpoint(self);
+}
+
+int __fastcall PlayLayer::resetLevelHook(CCLayer* self, void*) {
+    auto ret = resetLevel(self);
+    ReplaySystem::getInstance()->onReset();
+    return ret;
 }

@@ -33,6 +33,9 @@ namespace PlayLayer {
 	inline void* (__thiscall* onEditor)(CCLayer* self, void*);
 	void* __fastcall onEditorHook(CCLayer* self, void*, void*);
 
+	inline int (__thiscall* resetLevel)(CCLayer* self);
+	int __fastcall resetLevelHook(CCLayer* self, void*);
+
 	inline uint32_t(__thiscall* pushButton)(CCLayer* self, int, bool);
 	uint32_t __fastcall pushButtonHook(CCLayer* self, void*, int, bool);
 

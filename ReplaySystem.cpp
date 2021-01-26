@@ -38,10 +38,10 @@ void ReplaySystem::recordAction(bool hold, bool player1) {
 	}
 }
 
-void ReplaySystem::handleRecording() {
-	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
-	if (*x < lastPlayerX) {
-		std::cout << "Player died at " << lastPlayerX << " " << PracticeFixes::isHolding << std::endl;
+void ReplaySystem::onReset() {
+	if (recording) {
+		auto x = PlayerObject::getX(PlayLayer::getPlayer());
+		std::cout << "Lol u died " << *x << std::endl;
 		currentReplay->removeActionsAfterX(*x);
 		recordAction(PracticeFixes::isHolding, true);
 		// you cant "buffer hold" player 2
@@ -49,7 +49,11 @@ void ReplaySystem::handleRecording() {
 			recordAction(false, false);
 		PracticeFixes::applyCheckpoint();
 	}
-	lastPlayerX = *x;
+	else if (playing) {
+		PlayLayer::releaseButton(PlayLayer::self, 0, true);
+		PlayLayer::releaseButton(PlayLayer::self, 0, false);
+		curActionIndex = 0;
+	}
 }
 
 void ReplaySystem::playAction(Action action) {
