@@ -197,6 +197,10 @@ uintptr_t PlayLayer::getSelf() {
     return follow(follow(base + 0x3222D0) + 0x164);
 }
 
+double PlayLayer::getTime() {
+    return *reinterpret_cast<double*>(getSelf() + 0x450);
+}
+
 void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2) {
     auto isDead = reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(PlayLayer::self) + 0x39C);
     if (!*isDead) {

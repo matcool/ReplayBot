@@ -53,5 +53,6 @@ namespace PlayLayer {
 	uintptr_t getPlayer();
 	uintptr_t getPlayer2();
 	uintptr_t getSelf();
+	double getTime();
 };
 

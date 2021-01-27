@@ -4,6 +4,7 @@
 #include "PlayLayer.h"
 #include "PlayerObject.h"
 #include "GameManager.h"
+#include <fstream>
 
 void readInput(HMODULE hModule) {
     for (std::string line; std::getline(std::cin, line);) {
@@ -31,6 +32,28 @@ void readInput(HMODULE hModule) {
             auto speed = std::stof(line.substr(6));
             std::cout << "speedhack " << speed << std::endl;
             CCDirector::sharedDirector()->getScheduler()->setTimeScale(speed);
+        }
+        else if (line == "save-frame") {
+            // TODO: put this in a helper function
+            OPENFILENAMEA info;
+            ZeroMemory(&info, sizeof info);
+            CHAR fileName[MAX_PATH] = "";
+            info.lStructSize = sizeof info;
+            info.hwndOwner = NULL;
+            info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+            info.lpstrFile = fileName;
+            info.nMaxFile = MAX_PATH;
+            info.lpstrDefExt = "dat";
+            if (GetSaveFileNameA(&info)) {
+                std::cout << "Saving file: " << info.lpstrFile << std::endl;
+                std::ofstream outfile;
+                outfile.open(info.lpstrFile, std::ios::binary | std::ios::out);
+                for (auto& action : ReplaySystem::getInstance()->timeActions) {
+                    outfile.write(reinterpret_cast<char*>(&action.time), sizeof(double));
+                    outfile.write(reinterpret_cast<char*>(&action.hold), sizeof(bool));
+                }
+                outfile.close();
+            }
         }
     }
 }

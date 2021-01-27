@@ -27,6 +27,7 @@ void ReplaySystem::togglePlaying() {
 		PlayLayer::updateStatusLabel(playing ? "Playing" : "");
 		if (playing) {
 			curActionIndex = 0;
+			timeActions.clear();
 		}
 	}
 }
@@ -52,12 +53,14 @@ void ReplaySystem::onReset() {
 		PlayLayer::releaseButton(PlayLayer::self, 0, true);
 		PlayLayer::releaseButton(PlayLayer::self, 0, false);
 		curActionIndex = 0;
+		timeActions.clear();
 	}
 }
 
 void ReplaySystem::playAction(Action action) {
 	auto layer = PlayLayer::self;
 	// if (!PlayLayer::is2Player() && action.player2) return;
+	timeActions.push_back({ PlayLayer::getTime(), action.hold });
 	auto flip = PlayLayer::is2Player() && GameManager::is2PFlipped();
 	if (action.hold) PlayLayer::pushButton(layer, 0, !action.player2 ^ flip);
 	else PlayLayer::releaseButton(layer, 0, !action.player2 ^ flip);

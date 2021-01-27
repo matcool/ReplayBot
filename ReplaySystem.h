@@ -5,6 +5,12 @@
 
 using namespace cocos2d;
 
+struct TimeAction {
+	double time;
+	bool hold;
+	// no player 2 L
+};
+
 class ReplaySystem {
 	static ReplaySystem* instance;
 
@@ -16,6 +22,7 @@ class ReplaySystem {
 
 	size_t curActionIndex = 0;
 public:
+	std::vector<TimeAction> timeActions;
 	static ReplaySystem* getInstance() {
 		if (!instance) instance = new ReplaySystem();
 		return instance;
