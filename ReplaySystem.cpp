@@ -24,7 +24,8 @@ void ReplaySystem::togglePlaying() {
 		std::cout << "Toggled Playing" << std::endl;
 		playing = !playing;
 		recording = false;
-		PlayLayer::updateStatusLabel(playing ? "Playing" : "");
+		if (!showcaseMode)
+			PlayLayer::updateStatusLabel(playing ? "Playing" : "");
 		if (playing) {
 			curActionIndex = 0;
 		}
@@ -89,4 +90,8 @@ void ReplaySystem::saveReplay(const char* path) {
 	if (currentReplay) {
 		currentReplay->save(path);
 	}
+}
+
+bool ReplaySystem::toggleShowcaseMode() {
+	return (showcaseMode = !showcaseMode);
 }

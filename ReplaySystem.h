@@ -14,6 +14,8 @@ class ReplaySystem {
 	std::shared_ptr<Replay> currentReplay;
 	float defaultFPS = 120.f;
 
+	bool showcaseMode = false;
+
 	size_t curActionIndex = 0;
 public:
 	static ReplaySystem* getInstance() {
@@ -51,5 +53,7 @@ public:
 	void onReset();
 	void playAction(Action);
 	void handlePlaying();
+
+	bool toggleShowcaseMode();
 };
 
