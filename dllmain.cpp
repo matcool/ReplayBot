@@ -31,6 +31,14 @@ void readInput(HMODULE hModule) {
             std::cout << "Setting fps to " << fps << std::endl;
             ReplaySystem::getInstance()->setDefaultFPS(fps);
         }
+        else if (line.rfind("speed ", 0) == 0) {
+            auto speed = std::stof(line.substr(6));
+            auto replay = ReplaySystem::getInstance()->getCurrentReplay();
+            if (!replay) continue;
+            auto fps = replay->getFPS() * speed;
+            std::cout << "Setting speed to " << speed << " (fps=" << fps << ")" << std::endl;
+            CCDirector::sharedDirector()->setAnimationInterval(1. / fps);
+        }
     }
 }
 
