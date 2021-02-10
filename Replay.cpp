@@ -44,16 +44,14 @@ void Replay::save(const char* path) {
 Replay::Replay(const char* path) {
 	std::ifstream infile;
 	infile.open(path, std::ios::binary | std::ios::in);
+	infile.seekg(0, std::ios::end);
+	// this apparently can be inaccurate sometimes but i haven't seen it happen
+	auto size = static_cast<long>(infile.tellg());
+	infile.seekg(0);
 	this->fps = binRead<float>(&infile);
-	while (!infile.eof()) {
+	for (long _i = 0; _i < (size - 4) / 6; ++_i) {
 		Action action = { binRead<float>(&infile), binRead<bool>(&infile), binRead<bool>(&infile) };
-		// std::cout << "read action x=" << action.x << " hold=" << action.hold << " player2=" << action.player2 << std::endl;
 		this->actions.push_back(action);
-	}
-	// FIX: for some reason it always reads garbage data at the end
-	if (this->actions.back().hold > 1) {
-		std::cout << "Last action had hold=" << this->actions.back().hold << ", removing it" << std::endl;
-		this->actions.pop_back();
 	}
 	infile.close();
 	std::cout << "Replay loaded with fps=" << this->fps << std::endl;
