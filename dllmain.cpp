@@ -4,6 +4,7 @@
 #include "PlayLayer.h"
 #include "PlayerObject.h"
 #include "GameManager.h"
+#include <fstream>
 
 void readInput(HMODULE hModule) {
     for (std::string line; std::getline(std::cin, line);) {
@@ -47,8 +48,10 @@ DWORD WINAPI my_thread(void* hModule) {
     
     AllocConsole();
     SetConsoleTitleA("Console");
-    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+    // freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
     freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r", stdin);
+    static std::ofstream conout("CONOUT$", std::ios::out);
+    std::cout.rdbuf(conout.rdbuf());
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
