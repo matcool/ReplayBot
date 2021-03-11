@@ -362,3 +362,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 ffmpeg/
+inject.py
