@@ -3,84 +3,25 @@
 #include "utils.hpp"
 #include "PracticeFixes.h"
 #include "GameManager.h"
+#include "hook_utils.hpp"
 
 void PlayLayer::setup(uintptr_t base) {
     PlayLayer::base = base;
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x1FB780),
-        PlayLayer::initHook,
-        reinterpret_cast<void**>(&PlayLayer::init)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x2029C0),
-        PlayLayer::updateHook,
-        reinterpret_cast<void**>(&PlayLayer::update)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x1FD3D0),
-        PlayLayer::levelCompleteHook,
-        reinterpret_cast<void**>(&PlayLayer::levelComplete)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x20D810),
-        PlayLayer::onQuitHook,
-        reinterpret_cast<void**>(&PlayLayer::onQuit)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x111500),
-        pushButtonHook,
-        reinterpret_cast<void**>(&pushButton)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x111660),
-        releaseButtonHook,
-        reinterpret_cast<void**>(&releaseButton)
-    );
+    Hooks::addHook(base + 0x1FB780, initHook, &init);
+    Hooks::addHook(base + 0x2029C0, updateHook, &update);
+    Hooks::addHook(base + 0x1FD3D0, levelCompleteHook, &levelComplete);
+    Hooks::addHook(base + 0x20D810, onQuitHook, &onQuit);
+    Hooks::addHook(base + 0x111500, pushButtonHook, &pushButton);
+    Hooks::addHook(base + 0x111660, releaseButtonHook, &releaseButton);
 
     auto handle = GetModuleHandleA("libcocos2d.dll");
-    auto address = GetProcAddress(handle, "?update@CCScheduler@cocos2d@@UAEXM@Z");
-    schUpdateAddress = reinterpret_cast<void*>(address);
 
-    MH_CreateHook(
-        schUpdateAddress,
-        schUpdateHook,
-        reinterpret_cast<void**>(&schUpdate)
-    );
+    Hooks::addHook(GetProcAddress(handle, "?update@CCScheduler@cocos2d@@UAEXM@Z"), schUpdateHook, &schUpdate);
 
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x25FB60),
-        markCheckpointHook,
-        reinterpret_cast<void**>(&markCheckpoint)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x20B830),
-        removeLastCheckpointHook,
-        reinterpret_cast<void**>(&removeLastCheckpoint)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x1E60E0),
-        onEditorHook,
-        reinterpret_cast<void**>(&onEditor)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x20BF00),
-        resetLevelHook,
-        reinterpret_cast<void**>(&resetLevel)
-    );
-}
-
-void PlayLayer::unload(uintptr_t base) {
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FB780));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x2029C0));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1FD3D0));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D810));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x111500));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x111660));
-    MH_RemoveHook(schUpdateAddress);
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x25FB60));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20B830));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E60E0));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20BF00));
+    Hooks::addHook(base + 0x25FB60, markCheckpointHook, &markCheckpoint);
+    Hooks::addHook(base + 0x20B830, removeLastCheckpointHook, &removeLastCheckpoint);
+    Hooks::addHook(base + 0x1E60E0, onEditorHook, &onEditor);
+    Hooks::addHook(base + 0x20BF00, resetLevelHook, &resetLevel);
 }
 
 void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {

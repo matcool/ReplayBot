@@ -5,14 +5,14 @@
 #include "PlayerObject.h"
 #include "GameManager.h"
 #include <fstream>
+#include "hook_utils.hpp"
+#include "utils.hpp"
 
 void readInput(HMODULE hModule) {
     for (std::string line; std::getline(std::cin, line);) {
         if (line == "exit") {
             auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-            PauseLayer::unload(base);
-            PlayLayer::unload(base);
-            PlayerObject::unload(base);
+            Hooks::unload();
             fclose(stdout);
             fclose(stdin);
             FreeConsole();
@@ -44,14 +44,14 @@ void readInput(HMODULE hModule) {
 }
 
 DWORD WINAPI my_thread(void* hModule) {
-    MH_Initialize();
-    
     AllocConsole();
     SetConsoleTitleA("Console");
-    // freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
+    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
     freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r", stdin);
     static std::ofstream conout("CONOUT$", std::ios::out);
     std::cout.rdbuf(conout.rdbuf());
+
+    Hooks::init();
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
 
@@ -64,11 +64,7 @@ DWORD WINAPI my_thread(void* hModule) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-    std::cout << "ReplayBot loaded." << std::endl;
-    std::cout << "FPS is set to " << rs->getDefaultFPS() << std::endl;
-    std::cout << "To change it type in `fps (number)`" << std::endl;
-
-    readInput(reinterpret_cast<HMODULE>(hModule));
+    readInput(cast<HMODULE>(hModule));
 
     return 0;
 }
@@ -82,9 +78,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     {
     case DLL_PROCESS_ATTACH:
         CreateThread(0, 0x1000, my_thread, hModule, 0, 0);
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
         break;
     }
     return TRUE;

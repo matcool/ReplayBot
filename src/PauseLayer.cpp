@@ -2,23 +2,11 @@
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
 #include "PlayerObject.h"
+#include "hook_utils.hpp"
 
 void PauseLayer::setup(uintptr_t base) {
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x1E4620),
-        initHook,
-        reinterpret_cast<void**>(&init)
-    );
-    MH_CreateHook(
-        reinterpret_cast<void*>(base + 0x20D3C0),
-        onPauseHook,
-        reinterpret_cast<void**>(&onPause)
-    );
-}
-
-void PauseLayer::unload(uintptr_t base) {
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x1E4620));
-    MH_RemoveHook(reinterpret_cast<void*>(base + 0x20D3C0));
+    Hooks::addHook(base + 0x1E4620, initHook, &init);
+    Hooks::addHook(base + 0x20D3C0, onPauseHook, &onPause);
 }
 
 // this is probably on PlayLayer but i dontcare

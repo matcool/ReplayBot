@@ -3,7 +3,6 @@
 
 namespace PauseLayer {
 	void setup(uintptr_t);
-	void unload(uintptr_t);
 
 	inline void(__thiscall* init)(CCLayer* self);
 	void __fastcall initHook(CCLayer* self, void*);

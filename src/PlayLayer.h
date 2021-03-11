@@ -3,7 +3,6 @@
 
 namespace PlayLayer {
 	void setup(uintptr_t base);
-	void unload(uintptr_t base);
 	
 	constexpr int StatusLabelTag = 666;
 	inline CCLayer* self;
@@ -16,8 +15,6 @@ namespace PlayLayer {
 
 	inline void(__thiscall* update)(CCLayer* self, float dt);
 	void __fastcall updateHook(CCLayer* self, void*, float dt);
-
-	inline void* schUpdateAddress;
 
 	inline void(__thiscall* schUpdate)(CCScheduler* self, float dt);
 	void __fastcall schUpdateHook(CCScheduler* self, void*, float dt);
