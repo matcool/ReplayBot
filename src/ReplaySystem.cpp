@@ -83,7 +83,7 @@ void ReplaySystem::handlePlaying() {
 // TODO: support unicode paths
 
 void ReplaySystem::loadReplay(const char* path) {
-	currentReplay = std::make_shared<Replay>(path);
+	currentReplay = Replay::load(path);
 }
 
 void ReplaySystem::saveReplay(const char* path) {

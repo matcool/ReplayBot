@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 
 struct Action {
 	float x;
@@ -12,7 +13,6 @@ class Replay {
 	float fps;
 public:
 	Replay(float fps);
-	Replay(const char* path);
 
 	float getFPS() {
 		return fps;
@@ -26,5 +26,5 @@ public:
 	}
 
 	void save(const char* path);
-	//static Replay load(const char* path);
+	static std::shared_ptr<Replay> load(const char* path);
 };

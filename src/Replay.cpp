@@ -41,18 +41,19 @@ void Replay::save(const char* path) {
 	outfile.close();
 }
 
-Replay::Replay(const char* path) {
+std::shared_ptr<Replay> Replay::load(const char* path) {
 	std::ifstream infile;
 	infile.open(path, std::ios::binary | std::ios::in);
 	infile.seekg(0, std::ios::end);
 	// this apparently can be inaccurate sometimes but i haven't seen it happen
 	auto size = static_cast<long>(infile.tellg());
 	infile.seekg(0);
-	this->fps = binRead<float>(&infile);
+	auto fps = binRead<float>(&infile);
+	auto replay = std::make_shared<Replay>(fps);
 	for (long _i = 0; _i < (size - 4) / 6; ++_i) {
 		Action action = { binRead<float>(&infile), binRead<bool>(&infile), binRead<bool>(&infile) };
-		this->actions.push_back(action);
+		replay->addAction(action);
 	}
 	infile.close();
-	std::cout << "Replay loaded with fps=" << this->fps << std::endl;
+	return replay;
 }

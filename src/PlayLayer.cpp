@@ -139,10 +139,9 @@ uintptr_t PlayLayer::getSelf() {
 }
 
 void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2) {
-    auto isDead = reinterpret_cast<bool*>(reinterpret_cast<uintptr_t>(PlayLayer::self) + 0x39C);
-    if (!*isDead) {
+    auto isDead = read<bool>(cast<uintptr_t>(self) + 0x39C);
+    if (!isDead)
         PracticeFixes::addCheckpoint();
-    }
     return markCheckpoint(self, idk2);
 }
 
