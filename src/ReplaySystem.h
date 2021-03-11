@@ -1,9 +1,7 @@
 #pragma once
-#include "pch.h"
+#include "includes.h"
 #include "Replay.h"
 #include <memory>
-
-using namespace cocos2d;
 
 class ReplaySystem {
 	static ReplaySystem* instance;

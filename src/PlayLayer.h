@@ -1,7 +1,5 @@
 #pragma once
-#include "pch.h"
-
-using namespace cocos2d;
+#include "includes.h"
 
 namespace PlayLayer {
 	void setup(uintptr_t base);
