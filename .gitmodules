@@ -4,3 +4,6 @@
 [submodule "libraries/minhook"]
 	path = libraries/minhook
 	url = https://github.com/TsudaKageyu/minhook.git
+[submodule "libraries/gd.h"]
+	path = libraries/gd.h
+	url = https://github.com/poweredbypie/gd.h.git
