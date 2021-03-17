@@ -19,6 +19,8 @@ file(
 add_library(replay-bot SHARED ${SOURCE_FILES})
 
 target_include_directories(replay-bot PRIVATE
+  libraries/gd.h/include
+  libraries/gd.h
   libraries/minhook/include
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/include

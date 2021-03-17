@@ -37,6 +37,7 @@ void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
 }
 
 void PlayLayer::updateStatusLabel(const char* text) {
+    if (self == nullptr) return;
     auto director = CCDirector::sharedDirector();
     auto winSize = director->getWinSize();
 
@@ -139,7 +140,7 @@ uintptr_t PlayLayer::getSelf() {
 }
 
 void* __fastcall PlayLayer::markCheckpointHook(CCLayer* self, void*, void* idk2) {
-    auto isDead = read<bool>(cast<uintptr_t>(self) + 0x39C);
+    auto isDead = read<bool>(getSelf() + 0x39C);
     if (!isDead)
         PracticeFixes::addCheckpoint();
     return markCheckpoint(self, idk2);

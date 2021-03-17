@@ -12,5 +12,6 @@ using namespace cocos2d;
 #pragma warning(pop)
 
 #include <MinHook.h>
+#include <gd.h>
 
 #endif //PCH_H
