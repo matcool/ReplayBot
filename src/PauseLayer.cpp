@@ -3,6 +3,7 @@
 #include "PlayLayer.h"
 #include "PlayerObject.h"
 #include "hook_utils.hpp"
+#include "overlay.hpp"
 
 void PauseLayer::setup(uintptr_t base) {
     Hooks::addHook(base + 0x1E4620, initHook, &init);
@@ -20,104 +21,25 @@ void __fastcall PauseLayer::onPauseHook(void* self, void*, void* idk) {
     PlayerObject::preventInput = false;
 }
 
-void __fastcall PauseLayer::initHook(CCLayer* self, void*) {
+bool __fastcall PauseLayer::initHook(CCLayer* self, void*) {
     auto director = CCDirector::sharedDirector();
     auto winSize = director->getWinSize();
 
-    init(self);
+    bool ret = init(self);
 
     auto sprite = CCSprite::create("GJ_button_01.png");
-    auto sprite2 = CCSprite::create("GJ_button_02.png");
-    auto recordBtn = CCMenuItemSpriteExtra::create(sprite, sprite, self, menu_selector(PauseLayer::Callbacks::recordBtn));
-    recordBtn->setScale(0.6f);
+    auto button = CCMenuItemSpriteExtra::create(sprite, sprite, self, menu_selector(OverlayLayer::btnCallback));
+    button->setScale(0.6f);
 
-    auto recordLabel = CCLabelBMFont::create("Record", "bigFont.fnt");
-    recordLabel->setScale(0.5f);
-    recordLabel->setPositionX(15.f + recordLabel->getScaledContentSize().width / 2.f);
-
-    auto playBtn = CCMenuItemSpriteExtra::create(sprite, sprite, self, menu_selector(PauseLayer::Callbacks::playBtn));
-    playBtn->setScale(0.6f);
-
-    auto playLabel = CCLabelBMFont::create("Play", "bigFont.fnt");
-    playLabel->setScale(0.5f);
-    playLabel->setPositionX(15.f + playLabel->getScaledContentSize().width / 2.f);
-
-    playBtn->setPositionY(-30.f);
-    playLabel->setPositionY(-30.f);
-
-    auto loadBtn = CCMenuItemSpriteExtra::create(sprite2, sprite2, self, menu_selector(PauseLayer::Callbacks::loadBtn));
-    loadBtn->setScale(0.6f);
-
-    auto loadLabel = CCLabelBMFont::create("Load", "bigFont.fnt");
-    loadLabel->setScale(0.5f);
-    loadLabel->setPositionX(15.f + loadLabel->getScaledContentSize().width / 2.f);
-
-    loadBtn->setPositionY(-80.f);
-    loadLabel->setPositionY(-80.f);
-
-    auto saveBtn = CCMenuItemSpriteExtra::create(sprite2, sprite2, self, menu_selector(PauseLayer::Callbacks::saveBtn));
-    saveBtn->setScale(0.6f);
-
-    auto saveLabel = CCLabelBMFont::create("Save", "bigFont.fnt");
-    saveLabel->setScale(0.5f);
-    saveLabel->setPositionX(15.f + saveLabel->getScaledContentSize().width / 2.f);
-
-    saveBtn->setPositionY(-110.f);
-    saveLabel->setPositionY(-110.f);
+    auto label = CCLabelBMFont::create("ReplayBot", "bigFont.fnt");
+    label->setScale(0.5f);
+    label->setPositionX(15.f + label->getScaledContentSize().width / 2.f);
 
     auto menu = CCMenu::create();
-    menu->addChild(recordBtn);
-    menu->addChild(recordLabel);
-
-    menu->addChild(playBtn);
-    menu->addChild(playLabel);
-
-    menu->addChild(loadBtn);
-    menu->addChild(loadLabel);
-
-    menu->addChild(saveBtn);
-    menu->addChild(saveLabel);
-
+    menu->addChild(button);
+    menu->addChild(label);
     menu->setPosition(25, winSize.height - 40.f);
 
     self->addChild(menu);
-}
-
-void PauseLayer::Callbacks::recordBtn(CCObject*) {
-    ReplaySystem::getInstance()->toggleRecording();
-}
-
-void PauseLayer::Callbacks::playBtn(CCObject*) {
-    ReplaySystem::getInstance()->togglePlaying();
-}
-
-void PauseLayer::Callbacks::loadBtn(CCObject*) {
-    OPENFILENAMEA info;
-    ZeroMemory(&info, sizeof info);
-    CHAR fileName[MAX_PATH] = "";
-    info.lStructSize = sizeof info;
-    info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
-    info.lpstrFile = fileName;
-    info.nMaxFile = MAX_PATH;
-    if (GetOpenFileNameA(&info)) {
-        std::cout << "Loading file: " << info.lpstrFile << std::endl;
-        ReplaySystem::getInstance()->loadReplay(info.lpstrFile);
-    }
-}
-
-void PauseLayer::Callbacks::saveBtn(CCObject*) {
-    OPENFILENAMEA info;
-    ZeroMemory(&info, sizeof info);
-    CHAR fileName[MAX_PATH] = "";
-    info.lStructSize = sizeof info;
-    info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-    info.lpstrFile = fileName;
-    info.nMaxFile = MAX_PATH;
-    info.lpstrDefExt = "replay";
-    if (GetSaveFileNameA(&info)) {
-        std::cout << "Saving file: " << info.lpstrFile << std::endl;
-        ReplaySystem::getInstance()->saveReplay(info.lpstrFile);
-    }
+    return ret;
 }

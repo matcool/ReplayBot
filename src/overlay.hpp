@@ -9,28 +9,33 @@ protected:
 public:
     static OverlayLayer* create();
     bool initMyStuff();
-    bool ccTouchBegan(CCTouch* touch, CCEvent* e) override {
-        std::cout << "touch!" << std::endl;
-        return false;
-    }
     void keyBackClicked() {
-        std::cout << "Hello??" << std::endl;
         CCDirector::sharedDirector()->popSceneWithTransition(0.5f, PopTransition::FadeTransition);
     }
     void _btnBackCallback(CCObject*) {
-        std::cout << "Hello2??" << std::endl;
         // ???? why tf does this not work
-        this->keyBackClicked();
+        // this->keyBackClicked();
         // i give up
         _updateDefaultFPS();
-        CCDirector::sharedDirector()->popSceneWithTransition(0.5f, PopTransition::FadeTransition);
+        // CCDirector::sharedDirector()->popSceneWithTransition(0.5f, PopTransition::FadeTransition);
+        auto pauseLayer = this->getParent();
+        this->removeFromParentAndCleanup(true);
+        auto children = pauseLayer->getChildren();
+        for (unsigned i = 1; i < pauseLayer->getChildrenCount(); ++i) {
+            cast<CCNode*>(children->objectAtIndex(i))->setVisible(true);
+        }
     }
     void btnCallback(CCObject*) {
         auto layer = OverlayLayer::create();
-        auto scene = CCScene::create();
-        scene->addChild(layer);
-        CCDirector::sharedDirector()->pushScene(CCTransitionFade::create(0.5f, scene));
-        // CCDirector::sharedDirector()->getRunningScene()->addChild(OverlayLayer::create());
+        // auto scene = CCScene::create();
+        // scene->addChild(layer);
+        // CCDirector::sharedDirector()->pushScene(CCTransitionFade::create(0.5f, scene));
+        auto pauseLayer = cast<CCLayer*>(CCDirector::sharedDirector()->getRunningScene()->getChildren()->objectAtIndex(1));
+        auto children = pauseLayer->getChildren();
+        for (unsigned i = 1; i < pauseLayer->getChildrenCount(); ++i) {
+            cast<CCNode*>(children->objectAtIndex(i))->setVisible(false);
+        }
+        pauseLayer->addChild(layer);
     }
     void cbRecordBtn(CCObject*);
     void cbPlayBtn(CCObject*);

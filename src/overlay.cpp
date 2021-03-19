@@ -3,20 +3,9 @@
 
 OverlayLayer* OverlayLayer::create() {
     auto self = cast<OverlayLayer*>(CCLayerColor::create());
-
-    //self->registerWithTouchDispatcher();
-    //CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
-    //self->setTouchEnabled(true);
+    // isnt working :sob:
     self->setKeypadEnabled(true);
-    
-    //CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(self, -1024, true);
     self->initMyStuff();
-
-    // self->setTouchMode(ccTouchesMode::kCCTouchesOneByOne);
-
-
-    // director->getTouchDispatcher()->incrementForcePrio(200);
-    // self->setTouchEnabled(true);
 
     return self;
 }
@@ -56,10 +45,8 @@ bool OverlayLayer::initMyStuff() {
     auto winSize = director->getWinSize();
     auto rs = ReplaySystem::getInstance();
 
-    initWithColor({45, 93, 147, 255}, winSize.width, winSize.height);
-
-    // setZOrder(999);
-
+    initWithColor({0, 0, 0, 0}, winSize.width, winSize.height);
+    setZOrder(999);
     {
         auto btnBack = gd::CCMenuItemSpriteExtra::create(
             CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png"),

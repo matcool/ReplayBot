@@ -44,20 +44,6 @@ void readInput(HMODULE hModule) {
     }
 }
 
-inline bool(__thiscall* MenuLayer_init)(CCLayer* self);
-bool __fastcall MenuLayer_initHook(CCLayer* self, void*) {
-    auto ret = MenuLayer_init(self);
-
-    auto menu = CCMenu::create();
-    auto sprite = CCSprite::createWithSpriteFrameName("GJ_trailerBtn_001.png");
-    auto btn = CCMenuItemSpriteExtra::create(sprite, sprite, self, menu_selector(OverlayLayer::btnCallback));
-    menu->addChild(btn);
-    menu->setPosition({200, 200});
-    self->addChild(menu);
-
-    return ret;
-}
-
 DWORD WINAPI my_thread(void* hModule) {
     AllocConsole();
     SetConsoleTitleA("Console");
@@ -76,8 +62,6 @@ DWORD WINAPI my_thread(void* hModule) {
     PlayLayer::setup(base);
     PlayerObject::setup(base);
     GameManager::setup(base);
-
-    Hooks::addHook(base + 0x1907b0, MenuLayer_initHook, &MenuLayer_init);
 
     MH_EnableHook(MH_ALL_HOOKS);
 
