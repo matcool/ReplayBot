@@ -66,7 +66,7 @@ void ReplaySystem::playAction(Action action) {
 
 void ReplaySystem::handlePlaying() {
 	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
-	auto actions = currentReplay->getActions();
+	auto& actions = currentReplay->getActions();
 	if (curActionIndex < actions.size()) {
 		Action curAction;
 		// while loop since up to 4 actions can happen in the same frame

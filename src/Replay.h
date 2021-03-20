@@ -21,7 +21,7 @@ public:
 	void addAction(Action);
 	void removeActionsAfterX(float x);
 
-	std::vector<Action> getActions() {
+	std::vector<Action>& getActions() {
 		return actions;
 	}
 
