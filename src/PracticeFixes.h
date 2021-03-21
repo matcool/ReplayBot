@@ -5,14 +5,12 @@
 struct CheckpointData {
 	double yAccel;
 	float rotation;
-	float spriteRotation;
-	static CheckpointData fromPlayer(uintptr_t player) {
-		return { *PlayerObject::getYAccel(player), *PlayerObject::getRotation(player), *PlayerObject::getSpriteRotation(player) };
+	static CheckpointData fromPlayer(PlayerObject* player) {
+		return { player->m_yAccel, player->getRotation() };
 	};
-	void apply(uintptr_t player) {
-		*PlayerObject::getYAccel(player) = yAccel;
-		*PlayerObject::getRotation(player) = rotation;
-		*PlayerObject::getSpriteRotation(player) = spriteRotation;
+	void apply(PlayerObject* player) {
+		player->m_yAccel = yAccel;
+		player->setRotation(rotation);
 	}
 };
 

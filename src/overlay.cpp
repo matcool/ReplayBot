@@ -121,7 +121,7 @@ bool OverlayLayer::initMyStuff() {
 
 void OverlayLayer::_updateDefaultFPS() {
     std::string tmp(this->m_pIptFps->getLabelText());
-    ReplaySystem::getInstance()->setDefaultFPS(std::stoi(tmp));
+    ReplaySystem::getInstance()->setDefaultFPS((float)std::stoi(tmp));
 }
 
 void _loadReplayDialog() {

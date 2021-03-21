@@ -1,17 +1,21 @@
 #pragma once
 #include "includes.h"
 
-namespace PlayerObject {
+class PlayerObject : public CCSprite {
+public:
+	// sizeof(CCSprite) = 484
+	char _pad0[0x444];
+	double m_yAccel; // + 0x628
+	char _pad1[0x4C];
+	float m_xPos; // + 0x67C
+	float m_yPos;
+};
+
+namespace PlayerObjectHooks {
 	void setup(uintptr_t base);
 
 	inline bool preventInput = false;
 
-	inline void(__thiscall* releaseButton)(void* self, void*);
-	void __fastcall releaseButtonHook(void* self, void*, void*);
-
-	float* getX(uintptr_t);
-	double* getYAccel(uintptr_t);
-	float* getRotation(uintptr_t);
-	float* getSpriteRotation(uintptr_t);
-}
-
+	inline void(__thiscall* releaseButton)(PlayerObject* self, void*);
+	void __fastcall releaseButtonHook(PlayerObject* self, void*, void*);
+};

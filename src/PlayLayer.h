@@ -1,5 +1,6 @@
 #pragma once
 #include "includes.h"
+#include "PlayerObject.h"
 
 namespace PlayLayer {
 	void setup(uintptr_t base);
@@ -8,8 +9,8 @@ namespace PlayLayer {
 	inline CCLayer* self;
 	inline uintptr_t base;
 
-	inline void(__thiscall* init)(CCLayer* self, void*);
-	void __fastcall initHook(CCLayer* self, void*, void*);
+	inline bool(__thiscall* init)(CCLayer* self, void*);
+	bool __fastcall initHook(CCLayer* self, void*, void*);
 
 	void updateStatusLabel(const char* text);
 
@@ -31,11 +32,11 @@ namespace PlayLayer {
 	inline int (__thiscall* resetLevel)(CCLayer* self);
 	int __fastcall resetLevelHook(CCLayer* self, void*);
 
-	inline uint32_t(__thiscall* pushButton)(CCLayer* self, int, bool);
-	uint32_t __fastcall pushButtonHook(CCLayer* self, void*, int, bool);
+	inline int(__thiscall* pushButton)(CCLayer* self, int, bool);
+	int __fastcall pushButtonHook(CCLayer* self, void*, int, bool);
 
-	inline uint32_t(__thiscall* releaseButton)(CCLayer* self, int, bool);
-	uint32_t __fastcall releaseButtonHook(CCLayer* self, void*, int, bool);
+	inline int(__thiscall* releaseButton)(CCLayer* self, int, bool);
+	int __fastcall releaseButtonHook(CCLayer* self, void*, int, bool);
 
 	inline void*(__thiscall* markCheckpoint)(CCLayer* self, void*);
 	void* __fastcall markCheckpointHook(CCLayer* self, void*, void*);
@@ -45,8 +46,8 @@ namespace PlayLayer {
 
 	bool is2Player();
 
-	uintptr_t getPlayer();
-	uintptr_t getPlayer2();
+	PlayerObject* getPlayer();
+	PlayerObject* getPlayer2();
 	uintptr_t getSelf();
 };
 

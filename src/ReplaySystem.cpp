@@ -34,15 +34,14 @@ void ReplaySystem::togglePlaying() {
 
 void ReplaySystem::recordAction(bool hold, bool player1) {
 	if (recording) {
-		auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67c);
-		currentReplay->addAction({ *x, hold, PlayLayer::is2Player() && !player1 });
+		currentReplay->addAction({ PlayLayer::getPlayer()->m_xPos, hold, PlayLayer::is2Player() && !player1 });
 	}
 }
 
 void ReplaySystem::onReset() {
 	if (recording) {
-		auto x = PlayerObject::getX(PlayLayer::getPlayer());
-		currentReplay->removeActionsAfterX(*x);
+		auto x = PlayLayer::getPlayer()->m_xPos;
+		currentReplay->removeActionsAfterX(x);
 		recordAction(PracticeFixes::isHolding, true);
 		// you cant "buffer hold" player 2
 		if (PlayLayer::is2Player())
@@ -65,12 +64,12 @@ void ReplaySystem::playAction(Action action) {
 }
 
 void ReplaySystem::handlePlaying() {
-	auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
+	auto x = PlayLayer::getPlayer()->m_xPos;
 	auto& actions = currentReplay->getActions();
 	if (curActionIndex < actions.size()) {
 		Action curAction;
 		// while loop since up to 4 actions can happen in the same frame
-		while (curActionIndex < actions.size() && *x >= (curAction = actions[curActionIndex]).x) {
+		while (curActionIndex < actions.size() && x >= (curAction = actions[curActionIndex]).x) {
 			playAction(curAction);
 			++curActionIndex;
 		}

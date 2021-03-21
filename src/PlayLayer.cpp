@@ -24,16 +24,18 @@ void PlayLayer::setup(uintptr_t base) {
     Hooks::addHook(base + 0x20BF00, resetLevelHook, &resetLevel);
 }
 
-void __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
+bool __fastcall PlayLayer::initHook(CCLayer* self, void*, void* GJLevel) {
     PlayLayer::self = self;
-    init(self, GJLevel);
+    auto ret = init(self, GJLevel);
+    if (ret) {
+        // maybe switch to label atlas or whatever
+        auto label = CCLabelTTF::create("", "Arial", 14);
+        label->setZOrder(999);
+        label->setTag(StatusLabelTag);
 
-    // maybe switch to label atlas or whatever
-    auto label = CCLabelTTF::create("", "Arial", 14);
-    label->setZOrder(999);
-    label->setTag(StatusLabelTag);
-
-    self->addChild(label);
+        self->addChild(label);
+    }
+    return ret;
 }
 
 void PlayLayer::updateStatusLabel(const char* text) {
@@ -96,7 +98,7 @@ void* __fastcall PlayLayer::onEditorHook(CCLayer* self, void*, void* idk) {
     return onEditor(self, idk);
 }
 
-uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
+int __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, bool button) {
     // make sure it's in a play layer
     if (getSelf()) {
         auto rs = ReplaySystem::getInstance();
@@ -109,7 +111,7 @@ uint32_t __fastcall PlayLayer::pushButtonHook(CCLayer* self, void*, int idk, boo
     return pushButton(self, idk, button);
 }
 
-uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, bool button) {
+int __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, bool button) {
     if (getSelf()) {
         auto rs = ReplaySystem::getInstance();
         if (rs->isPlaying()) return 0;
@@ -123,16 +125,16 @@ uint32_t __fastcall PlayLayer::releaseButtonHook(CCLayer* self, void*, int idk, 
 
 // technically not in playlayer but who cares
 bool PlayLayer::is2Player() {
-    return *reinterpret_cast<bool*>(follow(follow(follow(base + 0x3222D0) + 0x164) + 0x22c) + 0xfa);
+    return *cast<bool*>(follow(follow(follow(base + 0x3222D0) + 0x164) + 0x22c) + 0xfa);
 }
 
-uintptr_t PlayLayer::getPlayer() {
-    if (self) return follow(reinterpret_cast<uintptr_t>(self) + 0x224);
-    return 0;
+PlayerObject* PlayLayer::getPlayer() {
+    if (self) return cast<PlayerObject*>(follow(cast<uintptr_t>(self) + 0x224));
+    return nullptr;
 }
-uintptr_t PlayLayer::getPlayer2() {
-    if (self) return follow(reinterpret_cast<uintptr_t>(self) + 0x228);
-    return 0;
+PlayerObject* PlayLayer::getPlayer2() {
+    if (self) return cast<PlayerObject*>(follow(cast<uintptr_t>(self) + 0x228));
+    return nullptr;
 }
 
 uintptr_t PlayLayer::getSelf() {

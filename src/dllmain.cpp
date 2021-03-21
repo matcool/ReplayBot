@@ -21,8 +21,9 @@ void readInput(HMODULE hModule) {
             break;
         }
         else if (line == "x") {
-            auto x = reinterpret_cast<float*>(PlayLayer::getPlayer() + 0x67C);
-            std::cout << *x << std::endl;
+            auto player = PlayLayer::getPlayer();
+            if (player != nullptr)
+                std::cout << player->m_xPos << " " << player->m_yPos << std::endl;
         }
         else if (line == "showcase") {
             auto s = ReplaySystem::getInstance()->toggleShowcaseMode();
@@ -60,7 +61,7 @@ DWORD WINAPI my_thread(void* hModule) {
     rs->init(base);
     PauseLayer::setup(base);
     PlayLayer::setup(base);
-    PlayerObject::setup(base);
+    PlayerObjectHooks::setup(base);
     GameManager::setup(base);
 
     MH_EnableHook(MH_ALL_HOOKS);

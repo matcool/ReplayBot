@@ -14,11 +14,11 @@ void PauseLayer::setup(uintptr_t base) {
 void __fastcall PauseLayer::onPauseHook(void* self, void*, void* idk) {
     auto rs = ReplaySystem::getInstance();
     if (rs->isPlaying())
-        PlayerObject::preventInput = true;
+        PlayerObjectHooks::preventInput = true;
     if (rs->isRecording())
         rs->recordAction(false, true);
     onPause(self, idk);
-    PlayerObject::preventInput = false;
+    PlayerObjectHooks::preventInput = false;
 }
 
 bool __fastcall PauseLayer::initHook(CCLayer* self, void*) {
