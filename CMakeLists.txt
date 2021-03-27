@@ -15,6 +15,8 @@ file(
   src/*.cpp
   # nice
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/custom/Sprites/CCMenuItemSpriteExtra/CCMenuItemSpriteExtra.cpp
+  libraries/nfd/src/nfd_common.c
+  libraries/nfd/src/nfd_win.cpp
 )
 add_library(replay-bot SHARED ${SOURCE_FILES})
 
@@ -22,6 +24,7 @@ target_include_directories(replay-bot PRIVATE
   libraries/gd.h/include
   libraries/gd.h
   libraries/minhook/include
+  libraries/nfd/src/include
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/include
   libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk/incl/cocos2dx/kazmath/include

@@ -1,5 +1,6 @@
 #include "overlay.hpp"
 #include "ReplaySystem.h"
+#include <nfd.h>
 
 OverlayLayer* OverlayLayer::create() {
     auto self = cast<OverlayLayer*>(CCLayerColor::create());
@@ -125,17 +126,12 @@ void OverlayLayer::_updateDefaultFPS() {
 }
 
 void _loadReplayDialog() {
-    OPENFILENAMEA info;
-    ZeroMemory(&info, sizeof info);
-    CHAR fileName[MAX_PATH] = "";
-    info.lStructSize = sizeof info;
-    info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
-    info.lpstrFile = fileName;
-    info.nMaxFile = MAX_PATH;
-    if (GetOpenFileNameA(&info)) {
-        ReplaySystem::getInstance()->loadReplay(info.lpstrFile);
+    nfdchar_t* path = nullptr;
+    auto result = NFD_OpenDialog("replay", nullptr, &path);
+    if (result == NFD_OKAY) {
+        ReplaySystem::getInstance()->loadReplay(path);
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay loaded.")->show();
+        free(path);
     }
 }
 
@@ -200,17 +196,11 @@ void OverlayLayer::cbLoadBtn(CCObject*) {
 
 void OverlayLayer::cbSaveBtn(CCObject*) {
     auto rs = ReplaySystem::getInstance();
-    OPENFILENAMEA info;
-    ZeroMemory(&info, sizeof info);
-    CHAR fileName[MAX_PATH] = "";
-    info.lStructSize = sizeof info;
-    info.hwndOwner = NULL;
-    info.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
-    info.lpstrFile = fileName;
-    info.nMaxFile = MAX_PATH;
-    info.lpstrDefExt = "replay";
-    if (GetSaveFileNameA(&info)) {
-        rs->saveReplay(info.lpstrFile);
+    nfdchar_t* path = nullptr;
+    auto result = NFD_SaveDialog("replay", nullptr, &path);
+    if (result == NFD_OKAY) {
+        rs->saveReplay(path);
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay saved.")->show();
+        free(path);
     }
 }
