@@ -3,7 +3,6 @@
 #include "PauseLayer.h"
 #include "PlayLayer.h"
 #include "PlayerObject.h"
-#include "GameManager.h"
 #include <fstream>
 #include "hook_utils.hpp"
 #include "utils.hpp"
@@ -62,7 +61,6 @@ DWORD WINAPI my_thread(void* hModule) {
     PauseLayer::setup(base);
     PlayLayer::setup(base);
     PlayerObjectHooks::setup(base);
-    GameManager::setup(base);
 
     MH_EnableHook(MH_ALL_HOOKS);
 

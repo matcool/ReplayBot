@@ -16,7 +16,7 @@ void __fastcall PauseLayer::onPauseHook(void* self, void*, void* idk) {
     if (rs->isPlaying())
         PlayerObjectHooks::preventInput = true;
     if (rs->isRecording())
-        rs->recordAction(false, true);
+        rs->recordAction(false, true, false);
     onPause(self, idk);
     PlayerObjectHooks::preventInput = false;
 }

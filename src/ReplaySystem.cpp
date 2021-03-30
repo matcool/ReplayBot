@@ -1,7 +1,7 @@
 #include "ReplaySystem.h"
 #include "PlayLayer.h"
 #include "PracticeFixes.h"
-#include "GameManager.h"
+#include <gd.h>
 
 ReplaySystem* ReplaySystem::instance;
 
@@ -32,8 +32,13 @@ void ReplaySystem::togglePlaying() {
 	}
 }
 
-void ReplaySystem::recordAction(bool hold, bool player1) {
+bool _should_flip_controls() {
+	return PlayLayer::is2Player() && gd::GameManager::sharedState()->getGameVariable("0010");
+}
+
+void ReplaySystem::recordAction(bool hold, bool player1, bool flip) {
 	if (recording) {
+		player1 ^= flip && _should_flip_controls();
 		currentReplay->addAction({ PlayLayer::getPlayer()->m_xPos, hold, PlayLayer::is2Player() && !player1 });
 	}
 }
@@ -42,10 +47,10 @@ void ReplaySystem::onReset() {
 	if (recording) {
 		auto x = PlayLayer::getPlayer()->m_xPos;
 		currentReplay->removeActionsAfterX(x);
-		recordAction(PracticeFixes::isHolding, true);
+		recordAction(PracticeFixes::isHolding, true, false);
 		// you cant "buffer hold" player 2
 		if (PlayLayer::is2Player())
-			recordAction(false, false);
+			recordAction(false, false, false);
 		PracticeFixes::applyCheckpoint();
 	}
 	else if (playing) {
@@ -57,10 +62,8 @@ void ReplaySystem::onReset() {
 
 void ReplaySystem::playAction(Action action) {
 	auto layer = PlayLayer::self;
-	// if (!PlayLayer::is2Player() && action.player2) return;
-	auto flip = PlayLayer::is2Player() && GameManager::is2PFlipped();
-	if (action.hold) PlayLayer::pushButton(layer, 0, !action.player2 ^ flip);
-	else PlayLayer::releaseButton(layer, 0, !action.player2 ^ flip);
+	auto flip = _should_flip_controls();
+	(action.hold ? PlayLayer::pushButton : PlayLayer::releaseButton)(layer, 0, !action.player2 ^ flip);
 }
 
 void ReplaySystem::handlePlaying() {

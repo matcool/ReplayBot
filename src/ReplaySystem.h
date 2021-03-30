@@ -47,7 +47,7 @@ public:
 		defaultFPS = fps;
 	}
 
-	void recordAction(bool hold, bool player1);
+	void recordAction(bool hold, bool player1, bool flip = true);
 	void onReset();
 	void playAction(Action);
 	void handlePlaying();
