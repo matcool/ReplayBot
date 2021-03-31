@@ -4,8 +4,8 @@
 
 class OverlayLayer : public CCLayerColor, public gd::FLAlertLayerProtocol {
 protected:
-    gd::CCTextInputNode* m_pIptFps;
-    CCLabelBMFont* m_pLblReplay;
+    gd::CCTextInputNode* m_fpsInput;
+    CCLabelBMFont* m_infoLabel;
 public:
     static OverlayLayer* create();
     bool initMyStuff();

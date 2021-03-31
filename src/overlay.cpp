@@ -27,7 +27,7 @@ void buttonWithLabel(CCMenu* menu, float x, float y, CCSprite* sprite, const cha
 }
 
 void OverlayLayer::_updateReplayLabel() {
-    auto label = m_pLblReplay;
+    auto label = m_infoLabel;
     auto replay = ReplaySystem::getInstance()->getCurrentReplay();
     auto winSize = CCDirector::sharedDirector()->getWinSize();
     std::stringstream stream;
@@ -100,7 +100,7 @@ bool OverlayLayer::initMyStuff() {
     iptFps->setMaxLabelLength(10); // who needs this much
     iptFps->setString(std::to_string((int)rs->getDefaultFPS()).c_str());
     addChild(iptFps);
-    m_pIptFps = iptFps;
+    m_fpsInput = iptFps;
 
     {
         auto label = CCLabelBMFont::create("FPS:", "bigFont.fnt");
@@ -111,7 +111,7 @@ bool OverlayLayer::initMyStuff() {
 
     {
         auto label = CCLabelBMFont::create("", "bigFont.fnt");
-        m_pLblReplay = label;
+        m_infoLabel = label;
         label->setScale(0.7f);
         _updateReplayLabel();
         addChild(label);
@@ -121,7 +121,7 @@ bool OverlayLayer::initMyStuff() {
 }
 
 void OverlayLayer::_updateDefaultFPS() {
-    std::string tmp(this->m_pIptFps->getString());
+    std::string tmp(this->m_fpsInput->getString());
     ReplaySystem::getInstance()->setDefaultFPS((float)std::stoi(tmp));
 }
 
@@ -197,6 +197,12 @@ void OverlayLayer::cbLoadBtn(CCObject*) {
 void OverlayLayer::cbSaveBtn(CCObject*) {
     auto rs = ReplaySystem::getInstance();
     nfdchar_t* path = nullptr;
+    // FIXME: this just crashes sometimes?? for no reason
+    // even when calling winapi directly
+    // after some debugging it seems to happen on IModalWindow::Show
+    // this didn't happen on the old ui
+    // so somehow i fucked up a winapi function in the process
+    // of making this overlay?? i'm so done
     auto result = NFD_SaveDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
         // dear god
