@@ -199,7 +199,9 @@ void OverlayLayer::cbSaveBtn(CCObject*) {
     nfdchar_t* path = nullptr;
     auto result = NFD_SaveDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
-        rs->saveReplay(path);
+        // dear god
+        auto _path = std::string(path) + ".replay";
+        rs->saveReplay(_path.c_str());
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay saved.")->show();
         free(path);
     }
