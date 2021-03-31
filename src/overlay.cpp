@@ -98,7 +98,7 @@ bool OverlayLayer::initMyStuff() {
     iptFps->setLabelPlaceholderColor({200, 200, 200});
     iptFps->setAllowedChars("0123456789");
     iptFps->setMaxLabelLength(10); // who needs this much
-    iptFps->setLabelText(std::to_string((int)rs->getDefaultFPS()).c_str());
+    iptFps->setString(std::to_string((int)rs->getDefaultFPS()).c_str());
     addChild(iptFps);
     m_pIptFps = iptFps;
 
@@ -121,7 +121,7 @@ bool OverlayLayer::initMyStuff() {
 }
 
 void OverlayLayer::_updateDefaultFPS() {
-    std::string tmp(this->m_pIptFps->getLabelText());
+    std::string tmp(this->m_pIptFps->getString());
     ReplaySystem::getInstance()->setDefaultFPS((float)std::stoi(tmp));
 }
 
