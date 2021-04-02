@@ -1,85 +1,42 @@
 #include "includes.h"
-#include "ReplaySystem.h"
-#include "PauseLayer.h"
-#include "PlayLayer.h"
-#include "PlayerObject.h"
 #include <fstream>
-#include "hook_utils.hpp"
-#include "utils.hpp"
-#include "overlay.hpp"
 
-void readInput(HMODULE hModule) {
-    for (std::string line; std::getline(std::cin, line);) {
-        if (line == "exit") {
-            auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-            Hooks::unload();
-            fclose(stdout);
-            fclose(stdin);
-            FreeConsole();
-            FreeLibraryAndExitThread(hModule, 0);
-            break;
-        }
-        else if (line == "x") {
-            auto player = PlayLayer::getPlayer();
-            if (player != nullptr)
-                std::cout << player->m_xPos << " " << player->m_yPos << std::endl;
-        }
-        else if (line == "showcase") {
-            auto s = ReplaySystem::getInstance()->toggleShowcaseMode();
-            std::cout << "Showcase mode is now " << (s ? "ON" : "OFF") << std::endl;
-        }
-        else if (line.rfind("fps ", 0) == 0) {
-            auto fps = std::stoi(line.substr(4));
-            std::cout << "Setting fps to " << fps << std::endl;
-            ReplaySystem::getInstance()->setDefaultFPS(fps);
-        }
-        else if (line.rfind("speed ", 0) == 0) {
-            auto speed = std::stof(line.substr(6));
-            auto replay = ReplaySystem::getInstance()->getCurrentReplay();
-            if (!replay) continue;
-            auto fps = replay->getFPS() * speed;
-            std::cout << "Setting speed to " << speed << " (fps=" << fps << ")" << std::endl;
-            CCDirector::sharedDirector()->setAnimationInterval(1. / fps);
-        }
-    }
-}
+#include "hooks.hpp"
 
-DWORD WINAPI my_thread(void* hModule) {
+#define _SHOW_CONSOLE_UWU 1
+
+DWORD WINAPI thread_entry(void* module) {
+#if _SHOW_CONSOLE_UWU
     AllocConsole();
-    SetConsoleTitleA("Console");
-    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w", stdout);
-    freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r", stdin);
     static std::ofstream conout("CONOUT$", std::ios::out);
+    static std::ifstream conin("CONIN$", std::ios::in);
     std::cout.rdbuf(conout.rdbuf());
+    std::cin.rdbuf(conin.rdbuf());
+#endif
+
+    MH_Initialize();
 
     Hooks::init();
 
-    auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
-
-    auto rs = ReplaySystem::getInstance();
-    rs->init(base);
-    PauseLayer::setup(base);
-    PlayLayer::setup(base);
-    PlayerObjectHooks::setup(base);
-
     MH_EnableHook(MH_ALL_HOOKS);
 
-    readInput(cast<HMODULE>(hModule));
+#if _SHOW_CONSOLE_UWU
+    std::string dababy;
+    std::getline(std::cin, dababy);
+    MH_Uninitialize();
+    conout.close();
+    conin.close();
+    FreeConsole();
+    FreeLibraryAndExitThread(cast<HMODULE>(module), 0);
+#endif
 
     return 0;
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule,
-    DWORD  ul_reason_for_call,
-    LPVOID lpReserved
-)
-{
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-        CreateThread(0, 0x1000, my_thread, hModule, 0, 0);
-        break;
+BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID reserved) {
+    if (reason == DLL_PROCESS_ATTACH) {
+        auto handle = CreateThread(0, 0x100, thread_entry, module, 0, 0);
+        if (handle) CloseHandle(handle);
     }
     return TRUE;
 }
-
