@@ -142,6 +142,10 @@ class penisdick {
             rs->toggle_recording();
         } else if (cast<int>(this) == 2) {
             rs->toggle_playing();
+        } else if (cast<int>(this) == 3) {
+            rs->get_replay().save("zzzzjiodsjoisajd.replay");
+        } else if (cast<int>(this) == 4) {
+            rs->get_replay() = Replay::load("zzzzjiodsjoisajd.replay");
         }
     }
 };
@@ -153,8 +157,14 @@ bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
         auto btn1 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(1), menu_selector(penisdick::thecallback));
         auto btn2 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(2), menu_selector(penisdick::thecallback));
         btn2->setPosition({50, 50});
+        auto btn3 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(3), menu_selector(penisdick::thecallback));
+        btn3->setPosition({70, 70});
+        auto btn4 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(4), menu_selector(penisdick::thecallback));
+        btn4->setPosition({90, 90});
         menu->addChild(btn1);
         menu->addChild(btn2);
+        menu->addChild(btn3);
+        menu->addChild(btn4);
         self->addChild(menu);
         return true;
     }
