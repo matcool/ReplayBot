@@ -136,11 +136,22 @@ void* __fastcall Hooks::_PlayLayer::onEditor_H(PlayLayer* self, int, void* idk) 
 
 bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
     if (PauseLayer_init(self)) {
+        auto win_size = CCDirector::sharedDirector()->getWinSize();
+        
         auto menu = CCMenu::create();
+        menu->setPosition(35, win_size.height - 40.f);
+        self->addChild(menu);
+        
         auto sprite = CCSprite::create("GJ_button_01.png");
+        sprite->setScale(0.72f);
         auto btn = gd::CCMenuItemSpriteExtra::create(sprite, self, menu_selector(OverlayLayer::open_btn_callback));
         menu->addChild(btn);
-        self->addChild(menu);
+        
+        auto label = CCLabelBMFont::create("ReplayBot", "bigFont.fnt");
+        label->setAnchorPoint({0, 0.5});
+        label->setScale(0.5f);
+        label->setPositionX(20);
+        menu->addChild(label);
         return true;
     }
     return false;
