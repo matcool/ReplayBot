@@ -1,5 +1,6 @@
 #include "hooks.hpp"
 #include "replay_system.hpp"
+#include "overlay_layer.hpp"
 
 auto add_gd_hook(uintptr_t offset, void* hook, void* orig) {
     return MH_CreateHook(cast<void*>(cast<uintptr_t>(gd::base) + offset), hook, cast<void**>(orig));
@@ -133,38 +134,12 @@ void* __fastcall Hooks::_PlayLayer::onEditor_H(PlayLayer* self, int, void* idk) 
     return onEditor(self, idk);
 }
 
-class penisdick {
-    public:
-    void thecallback(CCObject*) {
-        auto rs = ReplaySystem::get_instance();
-        // amazing
-        if (cast<int>(this) == 1) {
-            rs->toggle_recording();
-        } else if (cast<int>(this) == 2) {
-            rs->toggle_playing();
-        } else if (cast<int>(this) == 3) {
-            rs->get_replay().save("zzzzjiodsjoisajd.replay");
-        } else if (cast<int>(this) == 4) {
-            rs->get_replay() = Replay::load("zzzzjiodsjoisajd.replay");
-        }
-    }
-};
-
 bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
     if (PauseLayer_init(self)) {
         auto menu = CCMenu::create();
         auto sprite = CCSprite::create("GJ_button_01.png");
-        auto btn1 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(1), menu_selector(penisdick::thecallback));
-        auto btn2 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(2), menu_selector(penisdick::thecallback));
-        btn2->setPosition({50, 50});
-        auto btn3 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(3), menu_selector(penisdick::thecallback));
-        btn3->setPosition({70, 70});
-        auto btn4 = gd::CCMenuItemSpriteExtra::create(sprite, cast<CCObject*>(4), menu_selector(penisdick::thecallback));
-        btn4->setPosition({90, 90});
-        menu->addChild(btn1);
-        menu->addChild(btn2);
-        menu->addChild(btn3);
-        menu->addChild(btn4);
+        auto btn = gd::CCMenuItemSpriteExtra::create(sprite, self, menu_selector(OverlayLayer::open_btn_callback));
+        menu->addChild(btn);
         self->addChild(menu);
         return true;
     }
