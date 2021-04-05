@@ -123,10 +123,39 @@ void OverlayLayer::_update_default_fps() {
         ReplaySystem::get_instance()->set_default_fps(std::stof(text));
 }
 
+void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
+    if (!btn2) {
+        auto rs = ReplaySystem::get_instance();
+        int tag = alert->getTag();
+        if (tag == 1) {
+            rs->toggle_recording();
+            update_info_text();
+        } else if (tag == 2) {
+            _handle_load_replay();
+        }
+        update_info_text();
+    }
+}
+
 void OverlayLayer::on_record(CCObject*) {
     _update_default_fps();
-    ReplaySystem::get_instance()->toggle_recording();
-    update_info_text();
+    auto rs = ReplaySystem::get_instance();
+    if (!rs->is_recording()) {
+        if (rs->get_replay().get_actions().empty()) {
+            rs->toggle_recording();
+            update_info_text();
+        } else {
+            auto alert = gd::FLAlertLayer::create(this,
+            "Warning",
+            "Ok",
+            "Cancel",
+            "This will <cr>overwrite</c> your currently loaded replay.");
+            alert->setTag(1);
+            alert->show();
+        }
+    } else {
+        rs->toggle_recording();
+    }
 }
 
 void OverlayLayer::on_play(CCObject*) {
@@ -145,7 +174,7 @@ void OverlayLayer::on_save(CCObject*) {
     }
 }
 
-void OverlayLayer::on_load(CCObject*) {
+void OverlayLayer::_handle_load_replay() {
     nfdchar_t* path = nullptr;
     auto result = NFD_OpenDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
@@ -153,6 +182,21 @@ void OverlayLayer::on_load(CCObject*) {
         update_info_text();
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay loaded.")->show();
         free(path);
+    }
+}
+
+void OverlayLayer::on_load(CCObject*) {
+    auto rs = ReplaySystem::get_instance();
+    if (rs->get_replay().get_actions().empty()) {
+        _handle_load_replay();
+    } else {
+        auto alert = gd::FLAlertLayer::create(this,
+        "Warning",
+        "Ok",
+        "Cancel",
+        "This will <cr>overwrite</c> your currently loaded replay.");
+        alert->setTag(2);
+        alert->show();
     }
 }
 

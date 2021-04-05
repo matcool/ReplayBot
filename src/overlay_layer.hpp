@@ -1,11 +1,12 @@
 #pragma once
 #include "includes.h"
 
-class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate {
+class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate, public gd::FLAlertLayerProtocol {
     gd::CCTextInputNode* m_fps_input;
     CCLabelBMFont* m_replay_info;
 
     inline void _update_default_fps();
+    void _handle_load_replay();
 public:
     static auto create() {
         auto node = new OverlayLayer;
@@ -41,4 +42,5 @@ public:
         // keyDown overwrites keyBackClicked, how fun
         if (key == 27) keyBackClicked();
     }
+    virtual void FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2);
 };
