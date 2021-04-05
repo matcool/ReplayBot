@@ -49,3 +49,37 @@ void ReplaySystem::handle_playing() {
             toggle_playing();
     }
 }
+
+// why here out of all places? idk
+
+constexpr int STATUS_LABEL_TAG = 10032;
+
+auto _create_status_label(PlayLayer* play_layer) {
+    auto label = CCLabelBMFont::create("", "chatFont.fnt");
+    label->setTag(STATUS_LABEL_TAG);
+    label->setAnchorPoint({0, 0});
+    label->setPosition({5, 5});
+    label->setZOrder(999);
+    play_layer->addChild(label);
+    return label;
+}
+
+void ReplaySystem::_update_status_label() {
+    auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+    if (play_layer) {
+        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(10032));
+        if (!label)
+            label = _create_status_label(play_layer);
+        switch (state) {
+            case NOTHING:
+                label->setString("");
+                break;
+            case RECORDING:
+                label->setString("Recording");
+                break;
+            case PLAYING:
+                label->setString("Playing");
+                break;
+        }
+    }
+}
