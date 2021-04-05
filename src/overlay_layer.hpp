@@ -37,5 +37,8 @@ public:
     void on_load(CCObject*);
 
     virtual void keyBackClicked();
-    virtual void keyDown(enumKeyCodes key) {}
+    virtual void keyDown(enumKeyCodes key) {
+        // keyDown overwrites keyBackClicked, how fun
+        if (key == 27) keyBackClicked();
+    }
 };
