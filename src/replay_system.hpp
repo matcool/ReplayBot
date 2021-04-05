@@ -41,6 +41,7 @@ public:
     inline void toggle_recording() {
         state = is_recording() ? NOTHING : RECORDING;
         if (!is_recording()) frame_advance = false;
+        else replay = Replay(default_fps);
     }
 
     inline void reset_state() {

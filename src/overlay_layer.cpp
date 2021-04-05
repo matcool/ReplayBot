@@ -1,6 +1,7 @@
 #include "overlay_layer.hpp"
 #include "replay_system.hpp"
 #include <nfd.h>
+#include <sstream>
 
 bool OverlayLayer::init() {
     if (!initWithColor({ 0, 0, 0, 105 })) return false;
@@ -8,6 +9,7 @@ bool OverlayLayer::init() {
     setZOrder(20);
 
     auto win_size = CCDirector::sharedDirector()->getWinSize();
+    auto rs = ReplaySystem::get_instance();
         
     auto menu = CCMenu::create();
     menu->setPosition({0, win_size.height});
@@ -79,6 +81,7 @@ bool OverlayLayer::init() {
     addChild(sprite);
 
     m_fps_input = gd::CCTextInputNode::create("fps", nullptr, "bigFont.fnt", 100.f, 100.f);
+    m_fps_input->setString(std::to_string(static_cast<int>(rs->get_default_fps())).c_str());
     m_fps_input->setLabelPlaceholderColor({200, 200, 200});
     m_fps_input->setLabelPlaceholerScale(0.5f);
     m_fps_input->setMaxLabelScale(0.7f);
@@ -94,9 +97,10 @@ bool OverlayLayer::init() {
     label->setPosition({20, win_size.height - 115});
     addChild(label);
 
-    m_replay_info = CCLabelBMFont::create("Current Replay:\nFPS: 69\nActions: 563", "chatFont.fnt");
+    m_replay_info = CCLabelBMFont::create("", "chatFont.fnt");
     m_replay_info->setAnchorPoint({0, 1});
     m_replay_info->setPosition({20, win_size.height - 133});
+    update_info_text();
     addChild(m_replay_info);
 
     setKeypadEnabled(true);
@@ -105,8 +109,24 @@ bool OverlayLayer::init() {
     return true;
 }
 
+void OverlayLayer::update_info_text() {
+    auto rs = ReplaySystem::get_instance();
+    auto& replay = rs->get_replay();
+    std::stringstream stream;
+    stream << "Current Replay:\nFPS: " << replay.get_fps() << "\nActions: " << replay.get_actions().size();
+    m_replay_info->setString(stream.str().c_str());
+}
+
+void OverlayLayer::_update_default_fps() {
+    auto text = m_fps_input->getString();
+    if (text[0])
+        ReplaySystem::get_instance()->set_default_fps(std::stof(text));
+}
+
 void OverlayLayer::on_record(CCObject*) {
+    _update_default_fps();
     ReplaySystem::get_instance()->toggle_recording();
+    update_info_text();
 }
 
 void OverlayLayer::on_play(CCObject*) {
@@ -128,7 +148,13 @@ void OverlayLayer::on_load(CCObject*) {
     auto result = NFD_OpenDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
         ReplaySystem::get_instance()->get_replay() = Replay::load(path);
+        update_info_text();
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay loaded.")->show();
         free(path);
     }
+}
+
+void OverlayLayer::keyBackClicked() {
+    _update_default_fps();
+    gd::FLAlertLayer::keyBackClicked();
 }

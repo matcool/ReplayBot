@@ -1,10 +1,11 @@
 #pragma once
 #include "includes.h"
 
-class OverlayLayer : public gd::FLAlertLayer {
+class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate {
     gd::CCTextInputNode* m_fps_input;
     CCLabelBMFont* m_replay_info;
 
+    inline void _update_default_fps();
 public:
     static auto create() {
         auto node = new OverlayLayer;
@@ -18,14 +19,15 @@ public:
 
     virtual bool init();
 
+    void update_info_text();
+
     void open_btn_callback(CCObject*) {
         auto node = create();
         CCDirector::sharedDirector()->getRunningScene()->addChild(node);
     }
 
     void close_btn_callback(CCObject*) {
-        this->setKeyboardEnabled(false);
-        this->removeFromParentAndCleanup(true);
+        keyBackClicked();
     }
 
     // maybe do like on_btn_record idk
@@ -33,4 +35,6 @@ public:
     void on_play(CCObject*);
     void on_save(CCObject*);
     void on_load(CCObject*);
+
+    virtual void keyBackClicked();
 };
