@@ -37,4 +37,5 @@ public:
     void on_load(CCObject*);
 
     virtual void keyBackClicked();
+    virtual void keyDown(enumKeyCodes key) {}
 };
