@@ -11,6 +11,7 @@ namespace Hooks {
     void init();
 
     _THISCALL_HOOK(CCScheduler_update, void, CCScheduler, float dt)
+    _THISCALL_HOOK(CCKeyboardDispatcher_dispatchKeyboardMSG, void, CCKeyboardDispatcher, int key, bool down)
     
     // _ cuz yeah
     namespace _PlayLayer {

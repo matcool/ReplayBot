@@ -14,6 +14,7 @@ auto add_cocos_hook(const char* symbol, void* hook, void* orig) {
 
 void Hooks::init() {
     ADD_COCOS_HOOK("?update@CCScheduler@cocos2d@@UAEXM@Z", CCScheduler_update);
+    ADD_COCOS_HOOK("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z", CCKeyboardDispatcher_dispatchKeyboardMSG);
 
     ADD_GD_HOOK(0x1FB780, _PlayLayer::init);
     ADD_GD_HOOK(0x2029C0, _PlayLayer::update);
@@ -44,6 +45,25 @@ void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
     CCScheduler_update(self, dt);
 }
 
+void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDispatcher* self, int, int key, bool down) {
+    auto rs = ReplaySystem::get_instance();
+    if (down) {
+        auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+        if (rs->is_recording() && play_layer) {
+            if (key == 'C') {
+                rs->set_frame_advance(false);
+                _PlayLayer::update_H(play_layer, 0, 1.f / rs->get_default_fps());
+                rs->set_frame_advance(true);
+            } else if (key == 'F') {
+                rs->set_frame_advance(false);
+            } else if (key == 'R') {
+                _PlayLayer::resetLevel_H(play_layer, 0);
+            }
+        }
+    }
+    CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
+}
+
 
 bool __fastcall Hooks::_PlayLayer::init_H(PlayLayer* self, int, void* level) {
     return init(self, level);
@@ -51,6 +71,7 @@ bool __fastcall Hooks::_PlayLayer::init_H(PlayLayer* self, int, void* level) {
 
 void __fastcall Hooks::_PlayLayer::update_H(PlayLayer* self, int, float dt) {
     auto rs = ReplaySystem::get_instance();
+    if (rs->get_frame_advance()) return;
     if (rs->is_playing())
         rs->handle_playing();
     update(self, dt);
