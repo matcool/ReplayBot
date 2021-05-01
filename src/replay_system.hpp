@@ -39,15 +39,18 @@ public:
     inline bool is_playing() { return state == PLAYING; }
     inline bool is_recording() { return state == RECORDING; }
 
-    inline void toggle_playing() { state = is_playing() ? NOTHING : PLAYING; _update_status_label(); }
-    inline void toggle_recording() {
+    void toggle_playing() {
+        state = is_playing() ? NOTHING : PLAYING;
+        _update_status_label();
+    }
+    void toggle_recording() {
         state = is_recording() ? NOTHING : RECORDING;
         if (!is_recording()) frame_advance = false;
         else replay = Replay(default_fps);
         _update_status_label();
     }
 
-    inline void reset_state() {
+    void reset_state() {
         state = NOTHING;
         frame_advance = false;
         _update_status_label();
