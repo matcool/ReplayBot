@@ -28,8 +28,11 @@ void ReplaySystem::on_reset() {
         Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
     } else if (is_recording()) {
-        get_replay().remove_actions_after(play_layer->get_player()->x_pos);
-        record_action(practice_fixes.is_holding(), true, false);
+        replay.remove_actions_after(play_layer->get_player()->x_pos);
+        const auto& actions = replay.get_actions();
+        bool holding = *cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x611);
+        if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding))
+            record_action(holding, true, false);
         if (play_layer->get_level_settings()->is_two_player())
             record_action(false, false, false);
         practice_fixes.apply_checkpoint();

@@ -22,11 +22,8 @@ struct Checkpoint {
 
 class PracticeFixes {
     std::stack<Checkpoint> checkpoints;
-    bool holding;
 public:
     PracticeFixes() {}
-    bool is_holding() { return holding; }
-    void set_holding(bool h) { holding = h; }
 
 	void add_checkpoint() {
         auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());

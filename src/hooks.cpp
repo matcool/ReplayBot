@@ -83,7 +83,6 @@ bool _player_button_handler(bool hold, bool button) {
         auto rs = ReplaySystem::get_instance();
         if (rs->is_playing()) return true;
         rs->record_action(hold, button);
-        rs->get_practice_fixes().set_holding(hold);
     }
     return false;
 }
