@@ -31,8 +31,18 @@ void ReplaySystem::on_reset() {
         replay.remove_actions_after(play_layer->get_player()->x_pos);
         const auto& actions = replay.get_actions();
         bool holding = *cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x611);
-        if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding))
+        if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
             record_action(holding, true, false);
+            if (holding) {
+                auto buffer_thing = cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x612);
+                Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
+                Hooks::_PlayLayer::pushButton(play_layer, 0, true);
+                *buffer_thing = true;
+            }
+        } else if (!actions.empty() && actions.back().hold && holding && !practice_fixes.checkpoints.empty() && practice_fixes.checkpoints.top().player1.buffer_orb) {
+            Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
+            Hooks::_PlayLayer::pushButton(play_layer, 0, true);
+        }
         if (play_layer->get_level_settings()->is_two_player())
             record_action(false, false, false);
         practice_fixes.apply_checkpoint();

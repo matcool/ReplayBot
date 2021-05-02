@@ -6,8 +6,9 @@
 struct CheckpointData {
 	double y_accel;
 	float rotation;
+    bool buffer_orb;
 	static CheckpointData from_player(PlayerObject* player) {
-		return { player->y_accel, player->getRotation() };
+		return { player->y_accel, player->getRotation(), *cast<bool*>(cast<uintptr_t>(player) + 0x612) };
 	};
 	void apply(PlayerObject* player) {
 		player->y_accel = y_accel;
@@ -22,6 +23,7 @@ struct Checkpoint {
 
 class PracticeFixes {
     std::stack<Checkpoint> checkpoints;
+    friend class ReplaySystem;
 public:
     PracticeFixes() {}
 
