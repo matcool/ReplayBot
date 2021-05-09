@@ -3,7 +3,7 @@
 #include "overlay_layer.hpp"
 
 auto add_gd_hook(uintptr_t offset, void* hook, void* orig) {
-    return MH_CreateHook(cast<void*>(cast<uintptr_t>(gd::base) + offset), hook, cast<void**>(orig));
+    return MH_CreateHook(cast<void*>(gd::base + offset), hook, cast<void**>(orig));
 }
 #define ADD_GD_HOOK(o, f) add_gd_hook(o, f##_H, &f)
 
@@ -16,21 +16,21 @@ void Hooks::init() {
     ADD_COCOS_HOOK("?update@CCScheduler@cocos2d@@UAEXM@Z", CCScheduler_update);
     ADD_COCOS_HOOK("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z", CCKeyboardDispatcher_dispatchKeyboardMSG);
 
-    ADD_GD_HOOK(0x1FB780, _PlayLayer::init);
-    ADD_GD_HOOK(0x2029C0, _PlayLayer::update);
+    ADD_GD_HOOK(0x1FB780, PlayLayer::init);
+    ADD_GD_HOOK(0x2029C0, PlayLayer::update);
 
-    ADD_GD_HOOK(0x111500, _PlayLayer::pushButton);
-    ADD_GD_HOOK(0x111660, _PlayLayer::releaseButton);
-    ADD_GD_HOOK(0x20BF00, _PlayLayer::resetLevel);
+    ADD_GD_HOOK(0x111500, PlayLayer::pushButton);
+    ADD_GD_HOOK(0x111660, PlayLayer::releaseButton);
+    ADD_GD_HOOK(0x20BF00, PlayLayer::resetLevel);
 
-    ADD_GD_HOOK(0x20D3C0, _PlayLayer::pauseGame);
+    ADD_GD_HOOK(0x20D3C0, PlayLayer::pauseGame);
 
-    ADD_GD_HOOK(0x20B050, _PlayLayer::createCheckpoint);
-    ADD_GD_HOOK(0x20B830, _PlayLayer::removeLastCheckpoint);
+    ADD_GD_HOOK(0x20B050, PlayLayer::createCheckpoint);
+    ADD_GD_HOOK(0x20B830, PlayLayer::removeLastCheckpoint);
 
-    ADD_GD_HOOK(0x1FD3D0, _PlayLayer::levelComplete);
-    ADD_GD_HOOK(0x20D810, _PlayLayer::onQuit);
-    ADD_GD_HOOK(0x1E60E0, _PlayLayer::onEditor);
+    ADD_GD_HOOK(0x1FD3D0, PlayLayer::levelComplete);
+    ADD_GD_HOOK(0x20D810, PlayLayer::onQuit);
+    ADD_GD_HOOK(0x1E60E0, PlayLayer::onEditor);
 
     ADD_GD_HOOK(0x1E4620, PauseLayer_init);
 
@@ -51,16 +51,16 @@ void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
 void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDispatcher* self, int, int key, bool down) {
     auto rs = ReplaySystem::get_instance();
     if (down) {
-        auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+        auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         if (rs->is_recording() && play_layer) {
             if (key == 'C') {
                 rs->set_frame_advance(false);
-                _PlayLayer::update_H(play_layer, 0, 1.f / rs->get_default_fps());
+                PlayLayer::update_H(play_layer, 0, 1.f / rs->get_default_fps());
                 rs->set_frame_advance(true);
             } else if (key == 'F') {
                 rs->set_frame_advance(false);
             } else if (key == 'R') {
-                _PlayLayer::resetLevel_H(play_layer, 0);
+                PlayLayer::resetLevel_H(play_layer, 0);
             }
         }
     }
@@ -68,11 +68,11 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDisp
 }
 
 
-bool __fastcall Hooks::_PlayLayer::init_H(PlayLayer* self, int, void* level) {
+bool __fastcall Hooks::PlayLayer::init_H(gd::PlayLayer* self, int, void* level) {
     return init(self, level);
 }
 
-void __fastcall Hooks::_PlayLayer::update_H(PlayLayer* self, int, float dt) {
+void __fastcall Hooks::PlayLayer::update_H(gd::PlayLayer* self, int, float dt) {
     auto rs = ReplaySystem::get_instance();
     if (rs->get_frame_advance()) return;
     if (rs->is_playing())
@@ -90,24 +90,24 @@ bool _player_button_handler(bool hold, bool button) {
     return false;
 }
 
-int __fastcall Hooks::_PlayLayer::pushButton_H(PlayLayer* self, int, int idk, bool button) {
+int __fastcall Hooks::PlayLayer::pushButton_H(gd::PlayLayer* self, int, int idk, bool button) {
     if (_player_button_handler(true, button)) return 0;
     return pushButton(self, idk, button);
 }
 
-int __fastcall Hooks::_PlayLayer::releaseButton_H(PlayLayer* self, int, int idk, bool button) {
+int __fastcall Hooks::PlayLayer::releaseButton_H(gd::PlayLayer* self, int, int idk, bool button) {
     if (_player_button_handler(false, button)) return 0;
     return releaseButton(self, idk, button);
 }
 
-int __fastcall Hooks::_PlayLayer::resetLevel_H(PlayLayer* self, int) {
+int __fastcall Hooks::PlayLayer::resetLevel_H(gd::PlayLayer* self, int) {
     auto ret = resetLevel(self);
     ReplaySystem::get_instance()->on_reset();
     return ret;
 }
 
 
-void __fastcall Hooks::_PlayLayer::pauseGame_H(PlayLayer* self, int, bool idk) {
+void __fastcall Hooks::PlayLayer::pauseGame_H(gd::PlayLayer* self, int, bool idk) {
     auto addr = cast<void*>(gd::base + 0x20D43C);
     auto rs = ReplaySystem::get_instance();
     if (rs->is_recording())
@@ -124,19 +124,19 @@ void __fastcall Hooks::_PlayLayer::pauseGame_H(PlayLayer* self, int, bool idk) {
 }
 
 
-int __fastcall Hooks::_PlayLayer::createCheckpoint_H(PlayLayer* self, int) {
+int __fastcall Hooks::PlayLayer::createCheckpoint_H(gd::PlayLayer* self, int) {
     auto rs = ReplaySystem::get_instance();
     if (rs->is_recording()) rs->get_practice_fixes().add_checkpoint();
     return createCheckpoint(self);
 }
 
-void* __fastcall Hooks::_PlayLayer::removeLastCheckpoint_H(PlayLayer* self, int) {
+void* __fastcall Hooks::PlayLayer::removeLastCheckpoint_H(gd::PlayLayer* self, int) {
     ReplaySystem::get_instance()->get_practice_fixes().remove_checkpoint();
     return removeLastCheckpoint(self);
 }
 
 
-void* __fastcall Hooks::_PlayLayer::levelComplete_H(PlayLayer* self, int) {
+void* __fastcall Hooks::PlayLayer::levelComplete_H(gd::PlayLayer* self, int) {
     ReplaySystem::get_instance()->reset_state();
     return levelComplete(self);
 }
@@ -147,12 +147,12 @@ void _on_exit_level() {
     rs->reset_state();
 }
 
-void* __fastcall Hooks::_PlayLayer::onQuit_H(PlayLayer* self, int) {
+void* __fastcall Hooks::PlayLayer::onQuit_H(gd::PlayLayer* self, int) {
     _on_exit_level();
     return onQuit(self);
 }
 
-void* __fastcall Hooks::_PlayLayer::onEditor_H(PlayLayer* self, int, void* idk) {
+void* __fastcall Hooks::PlayLayer::onEditor_H(gd::PlayLayer* self, int, void* idk) {
     _on_exit_level();
     return onEditor(self, idk);
 }
@@ -183,7 +183,8 @@ bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
 void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::GameObject* ring) {
     PlayerObject_ringJump(self, ring);
     auto rs = ReplaySystem::get_instance();
-    if (rs->is_recording() && *cast<bool*>(cast<uintptr_t>(ring) + 0x2ca)) {
+    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
+    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && ring->hasBeenActivated) {
         rs->get_practice_fixes().add_activated_object(ring);
     }
 }
@@ -191,8 +192,8 @@ void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::
 void __fastcall Hooks::GameObject_activateObject_H(gd::GameObject* self, int, gd::PlayerObject* player) {
     GameObject_activateObject(self, player);
     auto rs = ReplaySystem::get_instance();
-    // need to check if its on practice mode duh
-    if (rs->is_recording() && *cast<bool*>(cast<uintptr_t>(self) + 0x2ca)) {
+    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
+    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && self->hasBeenActivated) {
         rs->get_practice_fixes().add_activated_object(self);
     }
 }

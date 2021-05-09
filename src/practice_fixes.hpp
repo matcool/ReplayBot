@@ -1,17 +1,16 @@
 #pragma once
 #include <stack>
-#include "types.hpp"
 #include "includes.h"
 
 struct CheckpointData {
-	double y_accel;
-	float rotation;
+    double y_accel;
+    float rotation;
     bool buffer_orb;
-	static CheckpointData from_player(PlayerObject* player) {
-		return { player->y_accel, player->getRotation(), *cast<bool*>(cast<uintptr_t>(player) + 0x612) };
+	static CheckpointData from_player(gd::PlayerObject* player) {
+		return { player->yAccel, player->getRotation(), player->canBufferOrb };
 	};
-	void apply(PlayerObject* player) {
-		player->y_accel = y_accel;
+	void apply(gd::PlayerObject* player) {
+		player->yAccel = y_accel;
 		player->setRotation(rotation);
 	}
 };
@@ -30,10 +29,10 @@ public:
     PracticeFixes() {}
 
 	void add_checkpoint() {
-        auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+        auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         checkpoints.push({
-            CheckpointData::from_player(play_layer->get_player()),
-            CheckpointData::from_player(play_layer->get_player2()),
+            CheckpointData::from_player(play_layer->player1),
+            CheckpointData::from_player(play_layer->player2),
             activated_objects.size()
         });
     }
@@ -51,10 +50,10 @@ public:
 
     void apply_checkpoint() {
         if (!checkpoints.empty()) {
-            auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+            auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
             auto checkpoint = checkpoints.top();
-            checkpoint.player1.apply(play_layer->get_player());
-            checkpoint.player2.apply(play_layer->get_player2());
+            checkpoint.player1.apply(play_layer->player1);
+            checkpoint.player2.apply(play_layer->player2);
         }
     }
     

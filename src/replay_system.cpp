@@ -1,5 +1,4 @@
 #include "replay_system.hpp"
-#include "types.hpp"
 #include "hooks.hpp"
 
 ReplaySystem* ReplaySystem::instance;
@@ -7,28 +6,28 @@ ReplaySystem* ReplaySystem::instance;
 void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
     if (is_recording()) {
         auto gm = gd::GameManager::sharedState();
-        auto play_layer = cast<PlayLayer*>(gm->getPlayLayer());
-        auto is_two_player = play_layer->get_level_settings()->is_two_player();
+        auto play_layer = gm->getPlayLayer();
+        auto is_two_player = play_layer->levelSettings->twoPlayerMode;
         player1 ^= flip && gm->getGameVariable("0010");
-        get_replay().add_action({ play_layer->get_player()->x_pos, hold, is_two_player && !player1 });
+        get_replay().add_action({ play_layer->player1->position.x, hold, is_two_player && !player1 });
     }
 }
 
 void ReplaySystem::play_action(const Action& action) {
     auto gm = gd::GameManager::sharedState();
     auto flip = gm->getGameVariable("0010");
-    auto func = action.hold ? Hooks::_PlayLayer::pushButton : Hooks::_PlayLayer::releaseButton;
-    func(cast<PlayLayer*>(gm->getPlayLayer()), 0, !action.player2 ^ flip);
+    auto func = action.hold ? Hooks::PlayLayer::pushButton : Hooks::PlayLayer::releaseButton;
+    func(gm->getPlayLayer(), 0, !action.player2 ^ flip);
 }
 
 void ReplaySystem::on_reset() {
-    auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (is_playing()) {
-        Hooks::_PlayLayer::releaseButton(play_layer, 0, false);
-        Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
+        Hooks::PlayLayer::releaseButton(play_layer, 0, false);
+        Hooks::PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
     } else if (is_recording()) {
-        replay.remove_actions_after(play_layer->get_player()->x_pos);
+        replay.remove_actions_after(play_layer->player1->position.x);
         auto& activated_objects = practice_fixes.activated_objects;
         if (practice_fixes.checkpoints.empty()) {
             activated_objects.clear();
@@ -38,24 +37,23 @@ void ReplaySystem::on_reset() {
                 activated_objects.end()
             );
             for (const auto object : activated_objects) {
-                *cast<bool*>(cast<uintptr_t>(object) + 0x2ca) = true;
+                object->hasBeenActivated = true;
             }
         }
         const auto& actions = replay.get_actions();
-        bool holding = *cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x611);
+        bool holding = play_layer->player1->isActuallyHolding;
         if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
             record_action(holding, true, false);
             if (holding) {
-                auto buffer_thing = cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x612);
-                Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
-                Hooks::_PlayLayer::pushButton(play_layer, 0, true);
-                *buffer_thing = true;
+                Hooks::PlayLayer::releaseButton(play_layer, 0, true);
+                Hooks::PlayLayer::pushButton(play_layer, 0, true);
+                play_layer->player1->canBufferOrb = true;
             }
         } else if (!actions.empty() && actions.back().hold && holding && !practice_fixes.checkpoints.empty() && practice_fixes.checkpoints.top().player1.buffer_orb) {
-            Hooks::_PlayLayer::releaseButton(play_layer, 0, true);
-            Hooks::_PlayLayer::pushButton(play_layer, 0, true);
+            Hooks::PlayLayer::releaseButton(play_layer, 0, true);
+            Hooks::PlayLayer::pushButton(play_layer, 0, true);
         }
-        if (play_layer->get_level_settings()->is_two_player())
+        if (play_layer->levelSettings->twoPlayerMode)
             record_action(false, false, false);
         practice_fixes.apply_checkpoint();
     }
@@ -63,7 +61,7 @@ void ReplaySystem::on_reset() {
 
 void ReplaySystem::handle_playing() {
     if (is_playing()) {
-        auto x = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer())->get_player()->x_pos;
+        auto x = gd::GameManager::sharedState()->getPlayLayer()->player1->position.x;
         auto& actions = replay.get_actions();
         Action action;
         while (action_index < actions.size() && x >= (action = actions[action_index]).x) {
@@ -79,18 +77,18 @@ void ReplaySystem::handle_playing() {
 
 constexpr int STATUS_LABEL_TAG = 10032;
 
-auto _create_status_label(PlayLayer* play_layer) {
+auto _create_status_label(CCLayer* layer) {
     auto label = CCLabelBMFont::create("", "chatFont.fnt");
     label->setTag(STATUS_LABEL_TAG);
     label->setAnchorPoint({0, 0});
     label->setPosition({5, 5});
     label->setZOrder(999);
-    play_layer->addChild(label);
+    layer->addChild(label);
     return label;
 }
 
 void ReplaySystem::_update_status_label() {
-    auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
+    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (play_layer) {
         auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(10032));
         if (!label)

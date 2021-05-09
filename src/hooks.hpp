@@ -1,6 +1,5 @@
 #pragma once
 #include "includes.h"
-#include "types.hpp"
 #include <vector>
 
 #define _THISCALL_HOOK(name, ret_type, self_type, ...) \
@@ -13,25 +12,24 @@ namespace Hooks {
     _THISCALL_HOOK(CCScheduler_update, void, CCScheduler, float dt)
     _THISCALL_HOOK(CCKeyboardDispatcher_dispatchKeyboardMSG, void, CCKeyboardDispatcher, int key, bool down)
     
-    // _ cuz yeah
-    namespace _PlayLayer {
-        _THISCALL_HOOK(init, bool, PlayLayer, void* level)
-        _THISCALL_HOOK(update, void, PlayLayer, float dt)
+    namespace PlayLayer {
+        _THISCALL_HOOK(init, bool, gd::PlayLayer, void* level)
+        _THISCALL_HOOK(update, void, gd::PlayLayer, float dt)
 
-        _THISCALL_HOOK(pushButton, int, PlayLayer, int, bool)
-        _THISCALL_HOOK(releaseButton, int, PlayLayer, int, bool)
-        _THISCALL_HOOK(resetLevel, int, PlayLayer)
+        _THISCALL_HOOK(pushButton, int, gd::PlayLayer, int, bool)
+        _THISCALL_HOOK(releaseButton, int, gd::PlayLayer, int, bool)
+        _THISCALL_HOOK(resetLevel, int, gd::PlayLayer)
 
-        _THISCALL_HOOK(pauseGame, void, PlayLayer, bool)
+        _THISCALL_HOOK(pauseGame, void, gd::PlayLayer, bool)
         
-        _THISCALL_HOOK(createCheckpoint, int, PlayLayer)
-        _THISCALL_HOOK(removeLastCheckpoint, void*, PlayLayer)
+        _THISCALL_HOOK(createCheckpoint, int, gd::PlayLayer)
+        _THISCALL_HOOK(removeLastCheckpoint, void*, gd::PlayLayer)
 
-        _THISCALL_HOOK(levelComplete, void*, PlayLayer)
+        _THISCALL_HOOK(levelComplete, void*, gd::PlayLayer)
         // these are only for stopping recording/playing
         // maybe hook the destructor instead ?
-        _THISCALL_HOOK(onQuit, void*, PlayLayer)
-        _THISCALL_HOOK(onEditor, void*, PlayLayer, void*)
+        _THISCALL_HOOK(onQuit, void*, gd::PlayLayer)
+        _THISCALL_HOOK(onEditor, void*, gd::PlayLayer, void*)
     }
 
     _THISCALL_HOOK(PauseLayer_init, bool, gd::PauseLayer)
