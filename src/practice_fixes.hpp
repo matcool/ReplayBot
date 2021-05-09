@@ -19,10 +19,12 @@ struct CheckpointData {
 struct Checkpoint {
     CheckpointData player1;
     CheckpointData player2;
+    size_t activated_objects_size;
 };
 
 class PracticeFixes {
     std::stack<Checkpoint> checkpoints;
+    std::vector<gd::GameObject*> activated_objects;
     friend class ReplaySystem;
 public:
     PracticeFixes() {}
@@ -31,13 +33,20 @@ public:
         auto play_layer = cast<PlayLayer*>(gd::GameManager::sharedState()->getPlayLayer());
         checkpoints.push({
             CheckpointData::from_player(play_layer->get_player()),
-            CheckpointData::from_player(play_layer->get_player2())
+            CheckpointData::from_player(play_layer->get_player2()),
+            activated_objects.size()
         });
     }
     
 	void remove_checkpoint() {
-        if (!checkpoints.empty())
+        if (!checkpoints.empty()) {
             checkpoints.pop();
+            if (checkpoints.empty()) {
+                activated_objects.clear();
+            } else {
+                activated_objects.erase(activated_objects.begin() + checkpoints.top().activated_objects_size, activated_objects.end());
+            }
+        }
     }
 
     void apply_checkpoint() {
@@ -52,5 +61,9 @@ public:
 	void clear_checkpoints() {
         while (!checkpoints.empty())
             checkpoints.pop();
+    }
+
+    void add_activated_object(gd::GameObject* object) {
+        activated_objects.push_back(object);
     }
 };

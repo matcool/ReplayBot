@@ -29,6 +29,18 @@ void ReplaySystem::on_reset() {
         action_index = 0;
     } else if (is_recording()) {
         replay.remove_actions_after(play_layer->get_player()->x_pos);
+        auto& activated_objects = practice_fixes.activated_objects;
+        if (practice_fixes.checkpoints.empty()) {
+            activated_objects.clear();
+        } else {
+            activated_objects.erase(
+                activated_objects.begin() + practice_fixes.checkpoints.top().activated_objects_size,
+                activated_objects.end()
+            );
+            for (const auto object : activated_objects) {
+                *cast<bool*>(cast<uintptr_t>(object) + 0x2ca) = true;
+            }
+        }
         const auto& actions = replay.get_actions();
         bool holding = *cast<bool*>(cast<uintptr_t>(play_layer->get_player()) + 0x611);
         if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {

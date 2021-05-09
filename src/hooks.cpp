@@ -33,6 +33,9 @@ void Hooks::init() {
     ADD_GD_HOOK(0x1E60E0, _PlayLayer::onEditor);
 
     ADD_GD_HOOK(0x1E4620, PauseLayer_init);
+
+    ADD_GD_HOOK(0x1f4ff0, PlayerObject_ringJump);
+    ADD_GD_HOOK(0xef0e0, GameObject_activateObject);
 }
 
 void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
@@ -175,4 +178,21 @@ bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
         return true;
     }
     return false;
+}
+
+void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::GameObject* ring) {
+    PlayerObject_ringJump(self, ring);
+    auto rs = ReplaySystem::get_instance();
+    if (rs->is_recording() && *cast<bool*>(cast<uintptr_t>(ring) + 0x2ca)) {
+        rs->get_practice_fixes().add_activated_object(ring);
+    }
+}
+
+void __fastcall Hooks::GameObject_activateObject_H(gd::GameObject* self, int, gd::PlayerObject* player) {
+    GameObject_activateObject(self, player);
+    auto rs = ReplaySystem::get_instance();
+    // need to check if its on practice mode duh
+    if (rs->is_recording() && *cast<bool*>(cast<uintptr_t>(self) + 0x2ca)) {
+        rs->get_practice_fixes().add_activated_object(self);
+    }
 }

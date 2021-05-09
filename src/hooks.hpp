@@ -35,4 +35,7 @@ namespace Hooks {
     }
 
     _THISCALL_HOOK(PauseLayer_init, bool, gd::PauseLayer)
+
+    _THISCALL_HOOK(PlayerObject_ringJump, void, gd::PlayerObject, gd::GameObject* ring)
+    _THISCALL_HOOK(GameObject_activateObject, void, gd::GameObject, gd::PlayerObject* player)
 }
