@@ -6,7 +6,7 @@
 	url = https://github.com/TsudaKageyu/minhook.git
 [submodule "libraries/gd.h"]
 	path = libraries/gd.h
-	url = https://github.com/poweredbypie/gd.h.git
+	url = git@github.com:matcool/gd.h.git
 [submodule "libraries/nfd"]
 	path = libraries/nfd
 	url = https://github.com/mlabbe/nativefiledialog
