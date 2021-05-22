@@ -7,7 +7,7 @@ void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
     if (is_recording()) {
         auto gm = gd::GameManager::sharedState();
         auto play_layer = gm->getPlayLayer();
-        auto is_two_player = play_layer->levelSettings->twoPlayerMode;
+        auto is_two_player = play_layer->levelSettings->m_twoPlayerMode;
         player1 ^= flip && gm->getGameVariable("0010");
         get_replay().add_action({ play_layer->player1->position.x, hold, is_two_player && !player1 });
     }
@@ -53,7 +53,7 @@ void ReplaySystem::on_reset() {
             Hooks::PlayLayer::releaseButton(play_layer, 0, true);
             Hooks::PlayLayer::pushButton(play_layer, 0, true);
         }
-        if (play_layer->levelSettings->twoPlayerMode)
+        if (play_layer->levelSettings->m_twoPlayerMode)
             record_action(false, false, false);
         practice_fixes.apply_checkpoint();
     }
