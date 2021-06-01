@@ -184,7 +184,7 @@ void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::
     PlayerObject_ringJump(self, ring);
     auto rs = ReplaySystem::get_instance();
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && ring->hasBeenActivated) {
+    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && ring->m_hasBeenActivated) {
         rs->get_practice_fixes().add_activated_object(ring);
     }
 }
@@ -193,7 +193,7 @@ void __fastcall Hooks::GameObject_activateObject_H(gd::GameObject* self, int, gd
     GameObject_activateObject(self, player);
     auto rs = ReplaySystem::get_instance();
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && self->hasBeenActivated) {
+    if (play_layer && play_layer->is_practice_mode && rs->is_recording() && self->m_hasBeenActivated) {
         rs->get_practice_fixes().add_activated_object(self);
     }
 }

@@ -31,8 +31,8 @@ public:
 	void add_checkpoint() {
         auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         checkpoints.push({
-            CheckpointData::from_player(play_layer->player1),
-            CheckpointData::from_player(play_layer->player2),
+            CheckpointData::from_player(play_layer->m_player1),
+            CheckpointData::from_player(play_layer->m_player2),
             activated_objects.size()
         });
     }
@@ -52,8 +52,8 @@ public:
         if (!checkpoints.empty()) {
             auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
             auto checkpoint = checkpoints.top();
-            checkpoint.player1.apply(play_layer->player1);
-            checkpoint.player2.apply(play_layer->player2);
+            checkpoint.player1.apply(play_layer->m_player1);
+            checkpoint.player2.apply(play_layer->m_player2);
         }
     }
     

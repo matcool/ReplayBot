@@ -1,15 +1,14 @@
 #include "replay_system.hpp"
 #include "hooks.hpp"
-
 ReplaySystem* ReplaySystem::instance;
 
 void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
     if (is_recording()) {
         auto gm = gd::GameManager::sharedState();
         auto play_layer = gm->getPlayLayer();
-        auto is_two_player = play_layer->levelSettings->m_twoPlayerMode;
+        auto is_two_player = play_layer->m_levelSettings->m_twoPlayerMode;
         player1 ^= flip && gm->getGameVariable("0010");
-        get_replay().add_action({ play_layer->player1->position.x, hold, is_two_player && !player1 });
+        get_replay().add_action({ play_layer->m_player1->position.x, hold, is_two_player && !player1 });
     }
 }
 
@@ -27,7 +26,7 @@ void ReplaySystem::on_reset() {
         Hooks::PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
     } else if (is_recording()) {
-        replay.remove_actions_after(play_layer->player1->position.x);
+        replay.remove_actions_after(play_layer->m_player1->position.x);
         auto& activated_objects = practice_fixes.activated_objects;
         if (practice_fixes.checkpoints.empty()) {
             activated_objects.clear();
@@ -37,23 +36,23 @@ void ReplaySystem::on_reset() {
                 activated_objects.end()
             );
             for (const auto object : activated_objects) {
-                object->hasBeenActivated = true;
+                object->m_hasBeenActivated = true;
             }
         }
         const auto& actions = replay.get_actions();
-        bool holding = play_layer->player1->isActuallyHolding;
+        bool holding = play_layer->m_player1->isActuallyHolding;
         if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
             record_action(holding, true, false);
             if (holding) {
                 Hooks::PlayLayer::releaseButton(play_layer, 0, true);
                 Hooks::PlayLayer::pushButton(play_layer, 0, true);
-                play_layer->player1->canBufferOrb = true;
+                play_layer->m_player1->canBufferOrb = true;
             }
         } else if (!actions.empty() && actions.back().hold && holding && !practice_fixes.checkpoints.empty() && practice_fixes.checkpoints.top().player1.buffer_orb) {
             Hooks::PlayLayer::releaseButton(play_layer, 0, true);
             Hooks::PlayLayer::pushButton(play_layer, 0, true);
         }
-        if (play_layer->levelSettings->m_twoPlayerMode)
+        if (play_layer->m_levelSettings->m_twoPlayerMode)
             record_action(false, false, false);
         practice_fixes.apply_checkpoint();
     }
@@ -61,7 +60,7 @@ void ReplaySystem::on_reset() {
 
 void ReplaySystem::handle_playing() {
     if (is_playing()) {
-        auto x = gd::GameManager::sharedState()->getPlayLayer()->player1->position.x;
+        auto x = gd::GameManager::sharedState()->getPlayLayer()->m_player1->position.x;
         auto& actions = replay.get_actions();
         Action action;
         while (action_index < actions.size() && x >= (action = actions[action_index]).x) {
