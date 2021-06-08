@@ -1,6 +1,5 @@
 #include "replay_system.hpp"
 #include "hooks.hpp"
-ReplaySystem* ReplaySystem::instance;
 
 void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
     if (is_recording()) {

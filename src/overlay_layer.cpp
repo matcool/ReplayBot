@@ -9,7 +9,7 @@ bool OverlayLayer::init() {
     setZOrder(20);
 
     auto win_size = CCDirector::sharedDirector()->getWinSize();
-    auto rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get_instance();
         
     auto menu = CCMenu::create();
     menu->setPosition({0, win_size.height});
@@ -81,7 +81,7 @@ bool OverlayLayer::init() {
     addChild(sprite);
 
     m_fps_input = gd::CCTextInputNode::create("fps", nullptr, "bigFont.fnt", 100.f, 100.f);
-    m_fps_input->setString(std::to_string(static_cast<int>(rs->get_default_fps())).c_str());
+    m_fps_input->setString(std::to_string(static_cast<int>(rs.get_default_fps())).c_str());
     m_fps_input->setLabelPlaceholderColor({200, 200, 200});
     m_fps_input->setLabelPlaceholerScale(0.5f);
     m_fps_input->setMaxLabelScale(0.7f);
@@ -110,8 +110,8 @@ bool OverlayLayer::init() {
 }
 
 void OverlayLayer::update_info_text() {
-    auto rs = ReplaySystem::get_instance();
-    auto& replay = rs->get_replay();
+    auto& rs = ReplaySystem::get_instance();
+    auto& replay = rs.get_replay();
     std::stringstream stream;
     stream << "Current Replay:\nFPS: " << replay.get_fps() << "\nActions: " << replay.get_actions().size();
     m_replay_info->setString(stream.str().c_str());
@@ -120,15 +120,15 @@ void OverlayLayer::update_info_text() {
 void OverlayLayer::_update_default_fps() {
     auto text = m_fps_input->getString();
     if (text[0])
-        ReplaySystem::get_instance()->set_default_fps(std::stof(text));
+        ReplaySystem::get_instance().set_default_fps(std::stof(text));
 }
 
 void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
     if (!btn2) {
-        auto rs = ReplaySystem::get_instance();
+        auto& rs = ReplaySystem::get_instance();
         int tag = alert->getTag();
         if (tag == 1) {
-            rs->toggle_recording();
+            rs.toggle_recording();
             update_info_text();
         } else if (tag == 2) {
             _handle_load_replay();
@@ -139,10 +139,10 @@ void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
 
 void OverlayLayer::on_record(CCObject*) {
     _update_default_fps();
-    auto rs = ReplaySystem::get_instance();
-    if (!rs->is_recording()) {
-        if (rs->get_replay().get_actions().empty()) {
-            rs->toggle_recording();
+    auto& rs = ReplaySystem::get_instance();
+    if (!rs.is_recording()) {
+        if (rs.get_replay().get_actions().empty()) {
+            rs.toggle_recording();
             update_info_text();
         } else {
             auto alert = gd::FLAlertLayer::create(this,
@@ -154,12 +154,12 @@ void OverlayLayer::on_record(CCObject*) {
             alert->show();
         }
     } else {
-        rs->toggle_recording();
+        rs.toggle_recording();
     }
 }
 
 void OverlayLayer::on_play(CCObject*) {
-    ReplaySystem::get_instance()->toggle_playing();
+    ReplaySystem::get_instance().toggle_playing();
 }
 
 void OverlayLayer::on_save(CCObject*) {
@@ -168,7 +168,7 @@ void OverlayLayer::on_save(CCObject*) {
     if (result == NFD_OKAY) {
         std::string s_path(path);
         // why doesnt it just add the extension for me
-        ReplaySystem::get_instance()->get_replay().save(s_path + ".replay");
+        ReplaySystem::get_instance().get_replay().save(s_path + ".replay");
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay saved.")->show();
         free(path);
     }
@@ -178,7 +178,7 @@ void OverlayLayer::_handle_load_replay() {
     nfdchar_t* path = nullptr;
     auto result = NFD_OpenDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
-        ReplaySystem::get_instance()->get_replay() = Replay::load(path);
+        ReplaySystem::get_instance().get_replay() = Replay::load(path);
         update_info_text();
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay loaded.")->show();
         free(path);
@@ -186,8 +186,8 @@ void OverlayLayer::_handle_load_replay() {
 }
 
 void OverlayLayer::on_load(CCObject*) {
-    auto rs = ReplaySystem::get_instance();
-    if (rs->get_replay().get_actions().empty()) {
+    auto& rs = ReplaySystem::get_instance();
+    if (rs.get_replay().get_actions().empty()) {
         _handle_load_replay();
     } else {
         auto alert = gd::FLAlertLayer::create(this,

@@ -10,8 +10,6 @@ enum RSState {
 };
 
 class ReplaySystem {
-    static ReplaySystem* instance;
-
     float default_fps;
 
     Replay replay;
@@ -27,9 +25,9 @@ class ReplaySystem {
 
     void _update_status_label();
 public:
-    static ReplaySystem* get_instance() {
-        if (!instance) instance = new ReplaySystem();
-		return instance;
+    static auto& get_instance() {
+        static ReplaySystem instance;
+        return instance;
     }
 
     inline auto& get_replay() { return replay; }
