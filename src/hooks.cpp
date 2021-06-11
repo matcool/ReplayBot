@@ -126,7 +126,7 @@ void __fastcall Hooks::PlayLayer::pauseGame_H(gd::PlayLayer* self, int, bool idk
 
 int __fastcall Hooks::PlayLayer::createCheckpoint_H(gd::PlayLayer* self, int) {
     auto& rs = ReplaySystem::get_instance();
-    if (rs.is_recording()) rs.get_practice_fixes().add_checkpoint();
+    if (rs.is_recording()) rs.get_practice_fixes().add_checkpoint(rs.get_frame());
     return createCheckpoint(self);
 }
 

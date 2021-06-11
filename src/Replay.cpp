@@ -3,8 +3,15 @@
 #include "utils.hpp"
 
 void Replay::remove_actions_after(float x) {
-	auto check = [&](const Action& action) -> bool {
+	const auto check = [&](const Action& action) -> bool {
 		return action.x >= x;
+	};
+	actions.erase(std::remove_if(actions.begin(), actions.end(), check), actions.end());
+}
+
+void Replay::remove_actions_after(unsigned frame) {
+	const auto check = [&](const Action& action) -> bool {
+		return action.frame >= frame;
 	};
 	actions.erase(std::remove_if(actions.begin(), actions.end(), check), actions.end());
 }
@@ -24,17 +31,33 @@ inline T bin_read(std::ifstream& stream) {
 	return value;
 }
 
-constexpr uint8_t format_ver = 1;
-constexpr const char format_magic[5] = "RPLY";
+/*
+ * Format changelog
+ *
+ * - version 1
+ * header | action[]
+ * header: "RPLY" | version as u8 | fps as f32
+ * action: x as f32 | state as u8
+ * 
+ * - version 2
+ * add `type as u8` between version and fps
+ * change action x to be either float or an unsigned int
+ */
+
+constexpr uint8_t format_ver = 2;
+constexpr const char format_magic[4] = {'R', 'P', 'L', 'Y'};
 
 void Replay::save(const std::string& path) {
 	std::ofstream file;
 	file.open(path, std::ios::binary | std::ios::out);
-	file << format_magic << format_ver;
+	file << format_magic << format_ver << type;
 	bin_write(file, fps);
 	for (const auto& action : actions) {
 		uint8_t state = action.hold | action.player2 << 1;
-		bin_write(file, action.x);
+		if (type == ReplayType::XPOS)
+			bin_write(file, action.x);
+		else if (type == ReplayType::FRAME)
+			bin_write(file, action.frame);
 		file << state;
 	}
 	file.close();
@@ -53,19 +76,25 @@ Replay Replay::load(const std::string& path)  {
 	file.read(magic, 4);
 	if (memcmp(magic, format_magic, 4) == 0) {
 		auto ver = bin_read<uint8_t>(file);
-		if (ver == 1) {
+		if (ver == 1 || ver == 2) {
+			if (ver == 2) replay.type = ReplayType(bin_read<uint8_t>(file));
 			replay.fps = bin_read<float>(file);
 			size_t left = file_size - static_cast<size_t>(file.tellg());
+			float x;
+			unsigned frame;
 			for (size_t _ = 0; _ < left / 5; ++_) {
-				float x = bin_read<float>(file);
+				if (replay.type == ReplayType::XPOS)
+					x = bin_read<float>(file);
+				else if (replay.type == ReplayType::FRAME)
+					frame = bin_read<unsigned>(file);
 				auto state = bin_read<uint8_t>(file);
 				bool hold = state & 1;
 				bool player2 = state & 2;
-				replay.add_action({ x, hold, player2 });
+				replay.add_action({ replay.type == ReplayType::XPOS ? x : frame, hold, player2 });
 			}
 		}
 	} else {
-		replay.fps = *reinterpret_cast<float*>(&magic);
+		replay.fps = *cast<float*>(&magic);
 		size_t left = file_size - static_cast<size_t>(file.tellg());
 		for (size_t _ = 0; _ < left / 6; ++_) {
 			float x = bin_read<float>(file);

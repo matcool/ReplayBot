@@ -3,10 +3,10 @@
 
 #include "hooks.hpp"
 
-#define _SHOW_CONSOLE_UWU 1
+#define _DEBUG
 
 DWORD WINAPI thread_entry(void* module) {
-#if _SHOW_CONSOLE_UWU
+#ifdef _DEBUG
     AllocConsole();
     static std::ofstream conout("CONOUT$", std::ios::out);
     static std::ifstream conin("CONIN$", std::ios::in);
@@ -20,9 +20,8 @@ DWORD WINAPI thread_entry(void* module) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-#if _SHOW_CONSOLE_UWU
-    std::string dababy;
-    std::getline(std::cin, dababy);
+#ifdef _DEBUG
+    std::getline(std::cin, std::string());
     MH_Uninitialize();
     conout.close();
     conin.close();
@@ -35,7 +34,7 @@ DWORD WINAPI thread_entry(void* module) {
 
 BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
-        auto handle = CreateThread(0, 0x100, thread_entry, module, 0, 0);
+        auto handle = CreateThread(0, 0, thread_entry, module, 0, 0);
         if (handle) CloseHandle(handle);
     }
     return TRUE;

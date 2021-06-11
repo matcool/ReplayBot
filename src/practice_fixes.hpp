@@ -19,6 +19,7 @@ struct Checkpoint {
     CheckpointData player1;
     CheckpointData player2;
     size_t activated_objects_size;
+    unsigned frame;
 };
 
 class PracticeFixes {
@@ -28,12 +29,13 @@ class PracticeFixes {
 public:
     PracticeFixes() {}
 
-	void add_checkpoint() {
+	void add_checkpoint(unsigned frame = 0) {
         auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         checkpoints.push({
             CheckpointData::from_player(play_layer->m_player1),
             CheckpointData::from_player(play_layer->m_player2),
-            activated_objects.size()
+            activated_objects.size(),
+            frame
         });
     }
     
