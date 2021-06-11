@@ -19,22 +19,23 @@ struct Checkpoint {
     CheckpointData player1;
     CheckpointData player2;
     size_t activated_objects_size;
+    size_t activated_objects_p2_size;
     unsigned frame;
 };
 
 class PracticeFixes {
     std::stack<Checkpoint> checkpoints;
     std::vector<gd::GameObject*> activated_objects;
+    std::vector<gd::GameObject*> activated_objects_p2;
     friend class ReplaySystem;
 public:
-    PracticeFixes() {}
-
 	void add_checkpoint(unsigned frame = 0) {
         auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         checkpoints.push({
             CheckpointData::from_player(play_layer->m_player1),
             CheckpointData::from_player(play_layer->m_player2),
             activated_objects.size(),
+            activated_objects_p2.size(),
             frame
         });
     }
@@ -66,5 +67,8 @@ public:
 
     void add_activated_object(gd::GameObject* object) {
         activated_objects.push_back(object);
+    }
+    void add_activated_object_p2(gd::GameObject* object) {
+        activated_objects_p2.push_back(object);
     }
 };

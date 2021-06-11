@@ -36,6 +36,7 @@ void Hooks::init() {
 
     ADD_GD_HOOK(0x1f4ff0, PlayerObject_ringJump);
     ADD_GD_HOOK(0xef0e0, GameObject_activateObject);
+    ADD_GD_HOOK(0x10ed50, GJBaseGameLayer_bumpPlayer);
 }
 
 void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
@@ -180,20 +181,34 @@ bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
     return false;
 }
 
-void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::GameObject* ring) {
-    PlayerObject_ringJump(self, ring);
-    auto& rs = ReplaySystem::get_instance();
+void _handle_activated_object(bool a, bool b, gd::GameObject* object) {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    if (play_layer && play_layer->is_practice_mode && rs.is_recording() && ring->m_hasBeenActivated) {
-        rs.get_practice_fixes().add_activated_object(ring);
+    auto& rs = ReplaySystem::get_instance();
+    if (play_layer && play_layer->is_practice_mode && rs.is_recording()) {
+        if (object->m_hasBeenActivated && !a)
+            rs.get_practice_fixes().add_activated_object(object);
+        if (object->m_hasBeenActivatedP2 && !b)
+            rs.get_practice_fixes().add_activated_object_p2(object);
     }
 }
 
+void __fastcall Hooks::PlayerObject_ringJump_H(gd::PlayerObject* self, int, gd::GameObject* ring) {
+    bool a = ring->m_hasBeenActivated;
+    bool b = ring->m_hasBeenActivatedP2;
+    PlayerObject_ringJump(self, ring);
+    _handle_activated_object(a, b, ring);
+}
+
 void __fastcall Hooks::GameObject_activateObject_H(gd::GameObject* self, int, gd::PlayerObject* player) {
+    bool a = self->m_hasBeenActivated;
+    bool b = self->m_hasBeenActivatedP2;
     GameObject_activateObject(self, player);
-    auto& rs = ReplaySystem::get_instance();
-    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    if (play_layer && play_layer->is_practice_mode && rs.is_recording() && self->m_hasBeenActivated) {
-        rs.get_practice_fixes().add_activated_object(self);
-    }
+    _handle_activated_object(a, b, self);
+}
+
+void __fastcall Hooks::GJBaseGameLayer_bumpPlayer_H(gd::GJBaseGameLayer* self, int, gd::PlayerObject* player, gd::GameObject* object) {
+    bool a = object->m_hasBeenActivated;
+    bool b = object->m_hasBeenActivatedP2;
+    GJBaseGameLayer_bumpPlayer(self, player, object);
+    _handle_activated_object(a, b, object);
 }

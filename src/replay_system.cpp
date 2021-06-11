@@ -40,18 +40,23 @@ void ReplaySystem::on_reset() {
         Hooks::PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
     } else if (is_recording()) {
-        auto& activated_objects = practice_fixes.activated_objects;
         if (practice_fixes.checkpoints.empty()) {
-            activated_objects.clear();
+            practice_fixes.activated_objects.clear();
+            practice_fixes.activated_objects_p2.clear();
             frame_offset = 0;
         } else {
             frame_offset = practice_fixes.checkpoints.top().frame;
-            activated_objects.erase(
-                activated_objects.begin() + practice_fixes.checkpoints.top().activated_objects_size,
-                activated_objects.end()
-            );
-            for (const auto object : activated_objects) {
+            constexpr auto delete_from = [&](auto& vec, size_t index) {
+                vec.erase(vec.begin() + index, vec.end());
+            };
+            const auto& checkpoint = practice_fixes.checkpoints.top();
+            delete_from(practice_fixes.activated_objects, checkpoint.activated_objects_size);
+            delete_from(practice_fixes.activated_objects_p2, checkpoint.activated_objects_p2_size);
+            for (const auto& object : practice_fixes.activated_objects) {
                 object->m_hasBeenActivated = true;
+            }
+            for (const auto& object : practice_fixes.activated_objects_p2) {
+                object->m_hasBeenActivatedP2 = true;
             }
         }
         if (replay.get_type() == ReplayType::XPOS)

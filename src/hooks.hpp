@@ -36,4 +36,5 @@ namespace Hooks {
 
     _THISCALL_HOOK(PlayerObject_ringJump, void, gd::PlayerObject, gd::GameObject* ring)
     _THISCALL_HOOK(GameObject_activateObject, void, gd::GameObject, gd::PlayerObject* player)
+    _THISCALL_HOOK(GJBaseGameLayer_bumpPlayer, void, gd::GJBaseGameLayer, gd::PlayerObject* player, gd::GameObject* object)
 }

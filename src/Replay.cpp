@@ -53,7 +53,7 @@ void Replay::save(const std::string& path) {
 	file << format_magic << format_ver << type;
 	bin_write(file, fps);
 	for (const auto& action : actions) {
-		uint8_t state = action.hold | action.player2 << 1;
+		uint8_t state = static_cast<uint8_t>(action.hold) | static_cast<uint8_t>(action.player2) << 1;
 		if (type == ReplayType::XPOS)
 			bin_write(file, action.x);
 		else if (type == ReplayType::FRAME)
@@ -90,7 +90,12 @@ Replay Replay::load(const std::string& path)  {
 				auto state = bin_read<uint8_t>(file);
 				bool hold = state & 1;
 				bool player2 = state & 2;
-				replay.add_action({ replay.type == ReplayType::XPOS ? x : frame, hold, player2 });
+				Action action = { 0, hold, player2 };
+				if (replay.type == ReplayType::XPOS)
+					action.x = x;
+				else if (replay.type == ReplayType::FRAME)
+					action.frame = frame;
+				replay.add_action(action);
 			}
 		}
 	} else {
