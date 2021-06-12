@@ -3,7 +3,7 @@
 
 #include "hooks.hpp"
 
-#define _DEBUG
+// #define _DEBUG
 
 DWORD WINAPI thread_entry(void* module) {
 #ifdef _DEBUG
