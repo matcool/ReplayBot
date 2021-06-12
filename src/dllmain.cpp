@@ -8,11 +8,13 @@
 DWORD WINAPI thread_entry(void* module) {
 #ifdef _DEBUG
     AllocConsole();
-    static std::ofstream conout("CONOUT$", std::ios::out);
-    static std::ifstream conin("CONIN$", std::ios::in);
+    std::ofstream conout("CONOUT$", std::ios::out);
+    std::ifstream conin("CONIN$", std::ios::in);
     std::cout.rdbuf(conout.rdbuf());
     std::cin.rdbuf(conin.rdbuf());
 #endif
+
+    DisableThreadLibraryCalls(cast<HMODULE>(module));
 
     MH_Initialize();
 

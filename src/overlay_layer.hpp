@@ -4,6 +4,8 @@
 class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate, public gd::FLAlertLayerProtocol {
     gd::CCTextInputNode* m_fps_input;
     CCLabelBMFont* m_replay_info;
+    gd::CCMenuItemToggler* m_x_pos_toggle;
+    gd::CCMenuItemToggler* m_frame_toggle;
 
     inline void _update_default_fps();
     void _handle_load_replay();
@@ -36,6 +38,9 @@ public:
     void on_play(CCObject*);
     void on_save(CCObject*);
     void on_load(CCObject*);
+
+    void on_x_pos(CCObject*);
+    void on_frame(CCObject*);
 
     virtual void keyBackClicked();
     virtual void keyDown(enumKeyCodes key) {

@@ -14,7 +14,7 @@ class ReplaySystem {
 
     Replay replay;
     RSState state = NOTHING;
-    ReplayType replay_type;
+    ReplayType default_type;
 
     size_t action_index = 0;
 
@@ -22,7 +22,7 @@ class ReplaySystem {
 
     bool frame_advance = false;
 
-    ReplaySystem() : default_fps(120.f), replay(default_fps), replay_type(replay.get_type()) {}
+    ReplaySystem() : default_fps(120.f), replay(default_fps), default_type(replay.get_type()) {}
 
     void _update_status_label();
 
@@ -37,6 +37,9 @@ public:
     inline auto get_default_fps() { return default_fps; }
     inline void set_default_fps(float fps) { default_fps = fps; }
 
+    inline auto get_default_type() { return default_type; }
+    inline void set_default_type(ReplayType type) { default_type = type; }
+
     inline bool is_playing() { return state == PLAYING; }
     inline bool is_recording() { return state == RECORDING; }
 
@@ -48,7 +51,7 @@ public:
     void toggle_recording() {
         state = is_recording() ? NOTHING : RECORDING;
         if (!is_recording()) frame_advance = false;
-        else replay = Replay(default_fps);
+        else replay = Replay(default_fps, default_type);
         frame_offset = 0;
         _update_status_label();
     }

@@ -71,6 +71,34 @@ bool OverlayLayer::init() {
     label->setPosition({win_size.width - 55, win_size.height - 85});
     addChild(label);
 
+    auto check_off_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+    auto check_on_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
+
+    m_x_pos_toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_x_pos));
+    m_x_pos_toggle->setPosition({win_size.width - 35, -120});
+    menu->addChild(m_x_pos_toggle);
+
+    m_frame_toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_frame));
+    m_frame_toggle->setPosition({win_size.width - 35, -155});
+    menu->addChild(m_frame_toggle);
+
+    if (rs.get_default_type() == ReplayType::XPOS)
+        m_x_pos_toggle->toggle(true);
+    else
+        m_frame_toggle->toggle(true);
+
+    label = CCLabelBMFont::create("X Pos", "bigFont.fnt");
+    label->setAnchorPoint({1, 0.5});
+    label->setScale(0.8f);
+    label->setPosition({win_size.width - 55, win_size.height - 120});
+    addChild(label);
+
+    label = CCLabelBMFont::create("Frame", "bigFont.fnt");
+    label->setAnchorPoint({1, 0.5});
+    label->setScale(0.8f);
+    label->setPosition({win_size.width - 55, win_size.height - 155});
+    addChild(label);
+
     sprite = CCSprite::create("square02b_001.png");
     sprite->setColor({0, 0, 0});
     sprite->setOpacity(69);
@@ -113,7 +141,9 @@ void OverlayLayer::update_info_text() {
     auto& rs = ReplaySystem::get_instance();
     auto& replay = rs.get_replay();
     std::stringstream stream;
-    stream << "Current Replay:\nFPS: " << replay.get_fps() << "\nActions: " << replay.get_actions().size();
+    stream << "Current Replay:\nFPS: " << replay.get_fps();
+    stream << "\nActions: " << replay.get_actions().size();
+    stream << "\nMode: " << (replay.get_type() == ReplayType::XPOS ? "X Pos" : "Frame");
     m_replay_info->setString(stream.str().c_str());
 }
 
@@ -203,4 +233,16 @@ void OverlayLayer::on_load(CCObject*) {
 void OverlayLayer::keyBackClicked() {
     _update_default_fps();
     gd::FLAlertLayer::keyBackClicked();
+}
+
+void OverlayLayer::on_x_pos(CCObject*) {
+    m_x_pos_toggle->toggle(false);
+    m_frame_toggle->toggle(false);
+    ReplaySystem::get_instance().set_default_type(ReplayType::XPOS);
+}
+
+void OverlayLayer::on_frame(CCObject*) {
+    m_x_pos_toggle->toggle(false);
+    m_frame_toggle->toggle(false);
+    ReplaySystem::get_instance().set_default_type(ReplayType::FRAME);
 }

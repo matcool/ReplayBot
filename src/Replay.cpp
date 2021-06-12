@@ -45,7 +45,7 @@ inline T bin_read(std::ifstream& stream) {
  */
 
 constexpr uint8_t format_ver = 2;
-constexpr const char format_magic[4] = {'R', 'P', 'L', 'Y'};
+constexpr const char* format_magic = "RPLY";
 
 void Replay::save(const std::string& path) {
 	std::ofstream file;
