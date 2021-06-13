@@ -64,7 +64,7 @@ void Replay::save(const std::string& path) {
 }
 
 Replay Replay::load(const std::string& path)  {
-	Replay replay(0);
+	Replay replay(0, ReplayType::XPOS);
 	std::ifstream file;
 	file.open(path, std::ios::binary | std::ios::in);
 
