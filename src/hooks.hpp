@@ -30,6 +30,8 @@ namespace Hooks {
         // maybe hook the destructor instead ?
         _THISCALL_HOOK(onQuit, void*, gd::PlayLayer)
         _THISCALL_HOOK(onEditor, void*, gd::PlayLayer, void*)
+
+        _THISCALL_HOOK(updateVisiblity, void, gd::PlayLayer)
     }
 
     _THISCALL_HOOK(PauseLayer_init, bool, gd::PauseLayer)

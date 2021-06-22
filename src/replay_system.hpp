@@ -76,4 +76,6 @@ public:
     inline void set_frame_advance(bool b) { frame_advance = b; }
 
     unsigned get_frame();
+
+    bool real_time_mode = true; // fuck it we going public
 };

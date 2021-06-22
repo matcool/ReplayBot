@@ -64,13 +64,13 @@ void ReplaySystem::on_reset() {
         else
             replay.remove_actions_after(get_frame());
         const auto& actions = replay.get_actions();
-        bool holding = play_layer->m_player1->isActuallyHolding;
+        bool holding = play_layer->m_player1->m_isHolding;
         if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
             record_action(holding, true, false);
             if (holding) {
                 Hooks::PlayLayer::releaseButton(play_layer, 0, true);
                 Hooks::PlayLayer::pushButton(play_layer, 0, true);
-                play_layer->m_player1->canBufferOrb = true;
+                play_layer->m_player1->m_hasJustHeld = true;
             }
         } else if (!actions.empty() && actions.back().hold && holding && !practice_fixes.checkpoints.empty() && practice_fixes.checkpoints.top().player1.buffer_orb) {
             Hooks::PlayLayer::releaseButton(play_layer, 0, true);

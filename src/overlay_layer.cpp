@@ -99,6 +99,17 @@ bool OverlayLayer::init() {
     label->setPosition({win_size.width - 55, win_size.height - 155});
     addChild(label);
 
+    auto toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_real_time));
+    toggle->setPosition({win_size.width - 35, -190});
+    toggle->toggle(rs.real_time_mode);
+    menu->addChild(toggle);
+
+    label = CCLabelBMFont::create("Real Time", "bigFont.fnt");
+    label->setAnchorPoint({1, 0.5});
+    label->setScale(0.8f);
+    label->setPosition({win_size.width - 55, win_size.height - 190});
+    addChild(label);
+
     sprite = CCSprite::create("square02b_001.png");
     sprite->setColor({0, 0, 0});
     sprite->setOpacity(69);
@@ -245,4 +256,11 @@ void OverlayLayer::on_frame(CCObject*) {
     m_x_pos_toggle->toggle(false);
     m_frame_toggle->toggle(false);
     ReplaySystem::get_instance().set_default_type(ReplayType::FRAME);
+}
+
+void OverlayLayer::on_toggle_real_time(CCObject* toggle_) {
+    auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
+    if (toggle != nullptr) {
+        ReplaySystem::get_instance().real_time_mode = !toggle->isOn(); // why is it flipped
+    }
 }

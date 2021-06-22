@@ -7,10 +7,10 @@ struct CheckpointData {
     float rotation;
     bool buffer_orb;
 	static CheckpointData from_player(gd::PlayerObject* player) {
-		return { player->yAccel, player->getRotation(), player->canBufferOrb };
+		return { player->m_yAccel, player->getRotation(), player->m_hasJustHeld };
 	};
 	void apply(gd::PlayerObject* player) {
-		player->yAccel = y_accel;
+		player->m_yAccel = y_accel;
 		player->setRotation(rotation);
 	}
 };

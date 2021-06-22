@@ -32,6 +32,8 @@ void Hooks::init() {
     ADD_GD_HOOK(0x20D810, PlayLayer::onQuit);
     ADD_GD_HOOK(0x1E60E0, PlayLayer::onEditor);
 
+    ADD_GD_HOOK(0x205460, PlayLayer::updateVisiblity);
+
     ADD_GD_HOOK(0x1E4620, PauseLayer_init);
 
     ADD_GD_HOOK(0x1f4ff0, PlayerObject_ringJump);
@@ -39,14 +41,41 @@ void Hooks::init() {
     ADD_GD_HOOK(0x10ed50, GJBaseGameLayer_bumpPlayer);
 }
 
+// yes these are global, too lazy to store them in replaysystem or smth
+// not like theyre used anywhere else atm
+bool g_disable_render = false;
+float g_left_over = 0.f;
+
 void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
     auto& rs = ReplaySystem::get_instance();
     if (rs.is_playing() || rs.is_recording() && gd::GameManager::sharedState()->getPlayLayer()) {
-        auto fps = rs.get_replay().get_fps();
+        const auto fps = rs.get_replay().get_fps();
         auto speedhack = self->getTimeScale();
-        dt = 1.f / fps / speedhack;
+
+        const float target_dt = 1.f / fps / speedhack;
+
+        if (!rs.real_time_mode)
+            return CCScheduler_update(self, target_dt);
+
+        // todo: find ways to disable more render stuff
+        g_disable_render = true;
+
+        // TODO: not have this min()
+        // doing the commented out if below causes really weird stutters for some reason
+        const int times = min(static_cast<int>((dt + g_left_over) / target_dt), 150);
+        // if the fps is really low then dont run it a lot of times
+        // if (dt > 1.f / 10.f) {
+        //     times = min(times, 100);
+        // }
+        for (int i = 0; i < times; ++i) {
+            if (i == times - 1)
+                g_disable_render = false;
+            CCScheduler_update(self, target_dt);
+        }
+        g_left_over += dt - target_dt * times;
+    } else {
+        CCScheduler_update(self, dt);
     }
-    CCScheduler_update(self, dt);
 }
 
 void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDispatcher* self, int, int key, bool down) {
@@ -211,4 +240,9 @@ void __fastcall Hooks::GJBaseGameLayer_bumpPlayer_H(gd::GJBaseGameLayer* self, i
     bool b = object->m_hasBeenActivatedP2;
     GJBaseGameLayer_bumpPlayer(self, player, object);
     _handle_activated_object(a, b, object);
+}
+
+void __fastcall Hooks::PlayLayer::updateVisiblity_H(gd::PlayLayer* self, int) {
+    if (!g_disable_render)
+        updateVisiblity(self);
 }
