@@ -131,7 +131,7 @@ void ReplaySystem::_update_status_label() {
                 label->setString("Recording");
                 break;
             case PLAYING:
-                label->setString("Playing");
+                label->setString("");
                 break;
         }
     }
