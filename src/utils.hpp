@@ -22,4 +22,21 @@ inline void patch(void* loc, std::vector<std::uint8_t> bytes) {
     VirtualProtect(loc, size, old_prot, &old_prot);
 }
 
+inline int dir_files_count(std::filesystem::path path) {
+    if (std::filesystem::is_directory(path)) {
+        auto iter = std::filesystem::directory_iterator(path);
+        int count = 0;
+
+        for (auto& entry : iter) {
+            if (entry.is_regular_file()) {
+                ++count;
+            }
+        }
+
+        return count;
+    }
+
+    return 0;
+}
+
 #endif

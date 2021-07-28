@@ -23,6 +23,33 @@ void ReplaySystem::play_action(const Action& action) {
     auto flip = gm->getGameVariable("0010");
     auto func = action.hold ? Hooks::PlayLayer::pushButton : Hooks::PlayLayer::releaseButton;
     func(gm->getPlayLayer(), 0, !action.player2 ^ flip);
+    ReplaySystem::play_sound(action.hold);
+}
+
+// Sounds must be in "Geometry Dash directory/clicks/"
+// "down" - mouse down sounds 
+// "up" - mouse up sounds 
+void ReplaySystem::play_sound(bool hold) {
+    std::string path = std::filesystem::current_path().string() + "/clicks/";
+    if (hold)
+        path += "down/";
+    else
+        path += "up/";
+
+    srand(time(0));
+
+    int files = dir_files_count(path);
+    if (files == 0) {
+        return;
+    }
+
+    int random = rand() % files;
+
+    path += std::to_string(random) + ".ogg";
+
+    if (std::filesystem::is_regular_file(path)) {
+        gd::GameSoundManager::sharedState()->playSound(path);
+    }
 }
 
 unsigned ReplaySystem::get_frame() {
@@ -120,7 +147,7 @@ auto _create_status_label(CCLayer* layer) {
 void ReplaySystem::_update_status_label() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (play_layer) {
-        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(10032));
+        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(STATUS_LABEL_TAG));
         if (!label)
             label = _create_status_label(play_layer);
         switch (state) {
