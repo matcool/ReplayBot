@@ -65,6 +65,8 @@ public:
 
     void record_action(bool hold, bool player1, bool flip = true);
     void play_action(const Action& action);
+    
+    void play_sound(bool hold);
 
     void on_reset();
 
