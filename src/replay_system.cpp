@@ -147,7 +147,7 @@ auto _create_status_label(CCLayer* layer) {
 void ReplaySystem::_update_status_label() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (play_layer) {
-        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(10032));
+        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(STATUS_LABEL_TAG));
         if (!label)
             label = _create_status_label(play_layer);
         switch (state) {
