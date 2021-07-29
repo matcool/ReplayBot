@@ -15,6 +15,7 @@ auto add_cocos_hook(const char* symbol, void* hook, void* orig) {
 void Hooks::init() {
     ADD_COCOS_HOOK("?update@CCScheduler@cocos2d@@UAEXM@Z", CCScheduler_update);
     ADD_COCOS_HOOK("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z", CCKeyboardDispatcher_dispatchKeyboardMSG);
+    ADD_GD_HOOK(0x20ddd0, CheckpointObject_create);
 
     ADD_GD_HOOK(0x1FB780, PlayLayer::init);
     ADD_GD_HOOK(0x2029C0, PlayLayer::update);
@@ -24,9 +25,6 @@ void Hooks::init() {
     ADD_GD_HOOK(0x20BF00, PlayLayer::resetLevel);
 
     ADD_GD_HOOK(0x20D3C0, PlayLayer::pauseGame);
-
-    ADD_GD_HOOK(0x20B050, PlayLayer::createCheckpoint);
-    ADD_GD_HOOK(0x20B830, PlayLayer::removeLastCheckpoint);
 
     ADD_GD_HOOK(0x1FD3D0, PlayLayer::levelComplete);
     ADD_GD_HOOK(0x20D810, PlayLayer::onQuit);
@@ -154,17 +152,10 @@ void __fastcall Hooks::PlayLayer::pauseGame_H(gd::PlayLayer* self, int, bool idk
 }
 
 
-int __fastcall Hooks::PlayLayer::createCheckpoint_H(gd::PlayLayer* self, int) {
-    auto& rs = ReplaySystem::get_instance();
-    if (rs.is_recording()) rs.get_practice_fixes().add_checkpoint(rs.get_frame());
-    return createCheckpoint(self);
+CCObject* __fastcall Hooks::CheckpointObject_create_H() {
+    std::cout << sizeof(CheckpointObjectMod) << std::endl; 
+    return CheckpointObjectMod::create();
 }
-
-void* __fastcall Hooks::PlayLayer::removeLastCheckpoint_H(gd::PlayLayer* self, int) {
-    ReplaySystem::get_instance().get_practice_fixes().remove_checkpoint();
-    return removeLastCheckpoint(self);
-}
-
 
 void* __fastcall Hooks::PlayLayer::levelComplete_H(gd::PlayLayer* self, int) {
     ReplaySystem::get_instance().reset_state();
@@ -173,7 +164,6 @@ void* __fastcall Hooks::PlayLayer::levelComplete_H(gd::PlayLayer* self, int) {
 
 void _on_exit_level() {
     auto& rs = ReplaySystem::get_instance();
-    rs.get_practice_fixes().clear_checkpoints();
     rs.reset_state();
 }
 
@@ -213,7 +203,7 @@ bool __fastcall Hooks::PauseLayer_init_H(gd::PauseLayer* self, int) {
 void _handle_activated_object(bool a, bool b, gd::GameObject* object) {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     auto& rs = ReplaySystem::get_instance();
-    if (play_layer && play_layer->is_practice_mode && rs.is_recording()) {
+    if (play_layer && play_layer->m_isPracticeMode && rs.is_recording()) {
         if (object->m_hasBeenActivated && !a)
             rs.get_practice_fixes().add_activated_object(object);
         if (object->m_hasBeenActivatedP2 && !b)

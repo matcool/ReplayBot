@@ -3,10 +3,10 @@
 
 #include "hooks.hpp"
 
-// #define _DEBUG
+// #define SHOW_CONSOLE
 
 DWORD WINAPI thread_entry(void* module) {
-#ifdef _DEBUG
+#ifdef SHOW_CONSOLE
     AllocConsole();
     std::ofstream conout("CONOUT$", std::ios::out);
     std::ifstream conin("CONIN$", std::ios::in);
@@ -22,7 +22,7 @@ DWORD WINAPI thread_entry(void* module) {
 
     MH_EnableHook(MH_ALL_HOOKS);
 
-#ifdef _DEBUG
+#ifdef SHOW_CONSOLE
     std::getline(std::cin, std::string());
     MH_Uninitialize();
     conout.close();

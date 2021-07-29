@@ -18,23 +18,24 @@ file(
 )
 add_library(replay-bot SHARED ${SOURCE_FILES})
 
-set(CAPPUCCINO_DIR ${CMAKE_SOURCE_DIR}/libraries/cappuccino-sdk/template/default-cpp/cappuccino-sdk)
-
 target_include_directories(replay-bot PRIVATE
   libraries/gd.h/include
   libraries/gd.h
   libraries/minhook/include
   libraries/nfd/src/include
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/include
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/kazmath/include
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/platform/win32
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/platform/third_party/win32
-  ${CAPPUCCINO_DIR}/incl/cocos2dx/platform/third_party/win32/OGLES
+  libraries/cocos-headers/cocos2dx/
+  libraries/cocos-headers/cocos2dx/include
+  libraries/cocos-headers/cocos2dx/kazmath/include
+  libraries/cocos-headers/cocos2dx/platform/win32
+  libraries/cocos-headers/cocos2dx/platform/third_party/win32
+  libraries/cocos-headers/cocos2dx/platform/third_party/win32/OGLES
+  libraries/cocos-headers/extensions/
 )
 
 add_subdirectory(libraries/minhook)
-# TODO: make it not build minhook every time
-target_link_libraries(replay-bot minhook)
 
-target_link_libraries(replay-bot ${CAPPUCCINO_DIR}/lib/cappuccino.lib)
+target_link_libraries(replay-bot
+  minhook
+  ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/libcocos2d.lib
+  ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/extensions/libExtensions.lib
+)

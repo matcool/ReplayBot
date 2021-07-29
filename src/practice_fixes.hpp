@@ -9,7 +9,7 @@ struct CheckpointData {
 	static CheckpointData from_player(gd::PlayerObject* player) {
 		return { player->m_yAccel, player->getRotation(), player->m_hasJustHeld };
 	};
-	void apply(gd::PlayerObject* player) {
+	void apply(gd::PlayerObject* player) const {
 		player->m_yAccel = y_accel;
 		player->setRotation(rotation);
 	}
@@ -23,48 +23,50 @@ struct Checkpoint {
     unsigned frame;
 };
 
+class CheckpointObjectMod : public gd::CheckpointObject {
+public:
+    Checkpoint m_checkpoint; // great name i know
+    void saveInfo();
+    static auto create() {
+        auto ret = new CheckpointObjectMod;
+        if (ret && ret->init()) {
+            ret->autorelease();
+            ret->saveInfo();
+        } else {
+            CC_SAFE_DELETE(ret);
+        }
+        return ret;
+    }
+};
+
 class PracticeFixes {
     std::stack<Checkpoint> checkpoints;
     std::vector<gd::GameObject*> activated_objects;
     std::vector<gd::GameObject*> activated_objects_p2;
     friend class ReplaySystem;
 public:
-	void add_checkpoint(unsigned frame = 0) {
+    Checkpoint create_checkpoint();
+
+    Checkpoint get_last_checkpoint() {
         auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-        checkpoints.push({
-            CheckpointData::from_player(play_layer->m_player1),
-            CheckpointData::from_player(play_layer->m_player2),
-            activated_objects.size(),
-            activated_objects_p2.size(),
-            frame
-        });
-    }
-    
-	void remove_checkpoint() {
-        if (!checkpoints.empty()) {
-            checkpoints.pop();
-            if (checkpoints.empty()) {
-                activated_objects.clear();
-            } else {
-                activated_objects.erase(activated_objects.begin() + checkpoints.top().activated_objects_size, activated_objects.end());
+        if (play_layer && play_layer->m_checkpoints->count()) {
+            auto checkpoint_obj = dynamic_cast<CheckpointObjectMod*>(play_layer->m_checkpoints->lastObject());
+            if (checkpoint_obj) {
+                return checkpoint_obj->m_checkpoint;
             }
         }
+        return {};
     }
 
     void apply_checkpoint() {
-        if (!checkpoints.empty()) {
-            auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-            auto checkpoint = checkpoints.top();
+        auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
+        if (play_layer) {
+            const auto checkpoint = get_last_checkpoint();
             checkpoint.player1.apply(play_layer->m_player1);
             checkpoint.player2.apply(play_layer->m_player2);
         }
     }
     
-	void clear_checkpoints() {
-        while (!checkpoints.empty())
-            checkpoints.pop();
-    }
-
     void add_activated_object(gd::GameObject* object) {
         activated_objects.push_back(object);
     }

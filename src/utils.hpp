@@ -1,5 +1,4 @@
-#ifndef __UTILS_HPP
-#define __UTILS_HPP
+#pragma once
 #include "includes.h"
 #include <vector>
 
@@ -22,4 +21,7 @@ inline void patch(void* loc, std::vector<std::uint8_t> bytes) {
     VirtualProtect(loc, size, old_prot, &old_prot);
 }
 
-#endif
+template <typename R, typename U>
+R& from_offset(U base, int offset) {
+    return *cast<R*>(cast<intptr_t>(base) + offset);
+}

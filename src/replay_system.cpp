@@ -11,7 +11,7 @@ void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
         action.hold = hold;
         action.player2 = is_two_player && !player1;
         if (replay.get_type() == ReplayType::XPOS)
-            action.x = play_layer->m_player1->position.x;
+            action.x = play_layer->m_player1->m_position.x;
         else if (replay.get_type() == ReplayType::FRAME)
             action.frame = get_frame();
         replay.add_action(action);
@@ -28,7 +28,7 @@ void ReplaySystem::play_action(const Action& action) {
 unsigned ReplaySystem::get_frame() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (play_layer != nullptr) {
-       return static_cast<unsigned>(play_layer->time * replay.get_fps()) + frame_offset;
+       return static_cast<unsigned>(play_layer->m_time * replay.get_fps()) + frame_offset;
     }
     return 0;
 }
@@ -40,16 +40,17 @@ void ReplaySystem::on_reset() {
         Hooks::PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
     } else if (is_recording()) {
-        if (practice_fixes.checkpoints.empty()) {
+        bool has_checkpoints = play_layer->m_checkpoints->count();
+        const auto checkpoint = practice_fixes.get_last_checkpoint();
+        if (!has_checkpoints) {
             practice_fixes.activated_objects.clear();
             practice_fixes.activated_objects_p2.clear();
             frame_offset = 0;
         } else {
-            frame_offset = practice_fixes.checkpoints.top().frame;
+            frame_offset = checkpoint.frame;
             constexpr auto delete_from = [&](auto& vec, size_t index) {
                 vec.erase(vec.begin() + index, vec.end());
             };
-            const auto& checkpoint = practice_fixes.checkpoints.top();
             delete_from(practice_fixes.activated_objects, checkpoint.activated_objects_size);
             delete_from(practice_fixes.activated_objects_p2, checkpoint.activated_objects_p2_size);
             for (const auto& object : practice_fixes.activated_objects) {
@@ -60,7 +61,7 @@ void ReplaySystem::on_reset() {
             }
         }
         if (replay.get_type() == ReplayType::XPOS)
-            replay.remove_actions_after(play_layer->m_player1->position.x);
+            replay.remove_actions_after(play_layer->m_player1->m_position.x);
         else
             replay.remove_actions_after(get_frame());
         const auto& actions = replay.get_actions();
@@ -72,7 +73,7 @@ void ReplaySystem::on_reset() {
                 Hooks::PlayLayer::pushButton(play_layer, 0, true);
                 play_layer->m_player1->m_hasJustHeld = true;
             }
-        } else if (!actions.empty() && actions.back().hold && holding && !practice_fixes.checkpoints.empty() && practice_fixes.checkpoints.top().player1.buffer_orb) {
+        } else if (!actions.empty() && actions.back().hold && holding && has_checkpoints && checkpoint.player1.buffer_orb) {
             Hooks::PlayLayer::releaseButton(play_layer, 0, true);
             Hooks::PlayLayer::pushButton(play_layer, 0, true);
         }
@@ -84,7 +85,7 @@ void ReplaySystem::on_reset() {
 
 void ReplaySystem::handle_playing() {
     if (is_playing()) {
-        auto x = gd::GameManager::sharedState()->getPlayLayer()->m_player1->position.x;
+        auto x = gd::GameManager::sharedState()->getPlayLayer()->m_player1->m_position.x;
         auto& actions = replay.get_actions();
         Action action;
         if (replay.get_type() == ReplayType::XPOS) {

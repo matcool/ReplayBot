@@ -6,11 +6,16 @@
 inline ret_type(__thiscall* name)(self_type* self, __VA_ARGS__); \
 ret_type __fastcall name##_H(self_type* self, int, __VA_ARGS__);
 
+#define _FASTCALL_HOOK(name, ret_type, ...) \
+inline ret_type(__fastcall* name)(__VA_ARGS__); \
+ret_type __fastcall name##_H(__VA_ARGS__);
+
 namespace Hooks {
     void init();
 
     _THISCALL_HOOK(CCScheduler_update, void, CCScheduler, float dt)
     _THISCALL_HOOK(CCKeyboardDispatcher_dispatchKeyboardMSG, void, CCKeyboardDispatcher, int key, bool down)
+    _FASTCALL_HOOK(CheckpointObject_create, CCObject*)
     
     namespace PlayLayer {
         _THISCALL_HOOK(init, bool, gd::PlayLayer, void* level)
@@ -22,9 +27,6 @@ namespace Hooks {
 
         _THISCALL_HOOK(pauseGame, void, gd::PlayLayer, bool)
         
-        _THISCALL_HOOK(createCheckpoint, int, gd::PlayLayer)
-        _THISCALL_HOOK(removeLastCheckpoint, void*, gd::PlayLayer)
-
         _THISCALL_HOOK(levelComplete, void*, gd::PlayLayer)
         // these are only for stopping recording/playing
         // maybe hook the destructor instead ?
