@@ -33,13 +33,21 @@ unsigned ReplaySystem::get_frame() {
     return 0;
 }
 
+void ReplaySystem::update_frame_offset() {
+    // if there is no last checkpoint then it should default to 0
+    frame_offset = practice_fixes.get_last_checkpoint().frame;
+}
+
 void ReplaySystem::on_reset() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (is_playing()) {
+        update_frame_offset();
         Hooks::PlayLayer::releaseButton(play_layer, 0, false);
         Hooks::PlayLayer::releaseButton(play_layer, 0, true);
         action_index = 0;
-    } else if (is_recording()) {
+        practice_fixes.activated_objects.clear();
+        practice_fixes.activated_objects_p2.clear();
+    } else {
         bool has_checkpoints = play_layer->m_checkpoints->count();
         const auto checkpoint = practice_fixes.get_last_checkpoint();
         if (!has_checkpoints) {
@@ -53,33 +61,37 @@ void ReplaySystem::on_reset() {
             };
             delete_from(practice_fixes.activated_objects, checkpoint.activated_objects_size);
             delete_from(practice_fixes.activated_objects_p2, checkpoint.activated_objects_p2_size);
-            for (const auto& object : practice_fixes.activated_objects) {
-                object->m_hasBeenActivated = true;
-            }
-            for (const auto& object : practice_fixes.activated_objects_p2) {
-                object->m_hasBeenActivatedP2 = true;
+            if (is_recording()) {
+                for (const auto& object : practice_fixes.activated_objects) {
+                    object->m_hasBeenActivated = true;
+                }
+                for (const auto& object : practice_fixes.activated_objects_p2) {
+                    object->m_hasBeenActivatedP2 = true;
+                }
             }
         }
-        if (replay.get_type() == ReplayType::XPOS)
-            replay.remove_actions_after(play_layer->m_player1->m_position.x);
-        else
-            replay.remove_actions_after(get_frame());
-        const auto& actions = replay.get_actions();
-        bool holding = play_layer->m_player1->m_isHolding;
-        if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
-            record_action(holding, true, false);
-            if (holding) {
+        if (is_recording()) {
+            if (replay.get_type() == ReplayType::XPOS)
+                replay.remove_actions_after(play_layer->m_player1->m_position.x);
+            else
+                replay.remove_actions_after(get_frame());
+            const auto& actions = replay.get_actions();
+            bool holding = play_layer->m_player1->m_isHolding;
+            if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
+                record_action(holding, true, false);
+                if (holding) {
+                    Hooks::PlayLayer::releaseButton(play_layer, 0, true);
+                    Hooks::PlayLayer::pushButton(play_layer, 0, true);
+                    play_layer->m_player1->m_hasJustHeld = true;
+                }
+            } else if (!actions.empty() && actions.back().hold && holding && has_checkpoints && checkpoint.player1.buffer_orb) {
                 Hooks::PlayLayer::releaseButton(play_layer, 0, true);
                 Hooks::PlayLayer::pushButton(play_layer, 0, true);
-                play_layer->m_player1->m_hasJustHeld = true;
             }
-        } else if (!actions.empty() && actions.back().hold && holding && has_checkpoints && checkpoint.player1.buffer_orb) {
-            Hooks::PlayLayer::releaseButton(play_layer, 0, true);
-            Hooks::PlayLayer::pushButton(play_layer, 0, true);
+            if (play_layer->m_levelSettings->m_twoPlayerMode)
+                record_action(false, false, false);
+            practice_fixes.apply_checkpoint();
         }
-        if (play_layer->m_levelSettings->m_twoPlayerMode)
-            record_action(false, false, false);
-        practice_fixes.apply_checkpoint();
     }
 }
 
@@ -121,7 +133,7 @@ auto _create_status_label(CCLayer* layer) {
 void ReplaySystem::_update_status_label() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (play_layer) {
-        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(10032));
+        auto label = cast<CCLabelBMFont*>(play_layer->getChildByTag(STATUS_LABEL_TAG));
         if (!label)
             label = _create_status_label(play_layer);
         switch (state) {

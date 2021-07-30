@@ -153,7 +153,6 @@ void __fastcall Hooks::PlayLayer::pauseGame_H(gd::PlayLayer* self, int, bool idk
 
 
 CCObject* __fastcall Hooks::CheckpointObject_create_H() {
-    std::cout << sizeof(CheckpointObjectMod) << std::endl; 
     return CheckpointObjectMod::create();
 }
 
