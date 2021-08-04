@@ -43,6 +43,7 @@ public:
     void on_frame(CCObject*);
 
     void on_toggle_real_time(CCObject*);
+    void on_toggle_showcase(CCObject*);
 
     virtual void keyBackClicked();
     virtual void keyDown(enumKeyCodes key) {

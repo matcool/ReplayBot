@@ -80,4 +80,5 @@ public:
     unsigned get_frame();
 
     bool real_time_mode = true; // fuck it we going public
+    bool showcase_mode = false;
 };

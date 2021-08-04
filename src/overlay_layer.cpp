@@ -110,6 +110,17 @@ bool OverlayLayer::init() {
     label->setPosition({win_size.width - 55, win_size.height - 190});
     addChild(label);
 
+    toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_showcase));
+    toggle->setPosition({win_size.width - 35, -225});
+    toggle->toggle(rs.showcase_mode);
+    menu->addChild(toggle);
+
+    label = CCLabelBMFont::create("Showcase Mode", "bigFont.fnt");
+    label->setAnchorPoint({1, 0.5});
+    label->setScale(0.6f);
+    label->setPosition({win_size.width - 55, win_size.height - 225});
+    addChild(label);
+
     sprite = CCSprite::create("square02b_001.png");
     sprite->setColor({0, 0, 0});
     sprite->setOpacity(69);
@@ -262,5 +273,12 @@ void OverlayLayer::on_toggle_real_time(CCObject* toggle_) {
     auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
     if (toggle != nullptr) {
         ReplaySystem::get_instance().real_time_mode = !toggle->isOn(); // why is it flipped
+    }
+}
+
+void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
+    auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
+    if (toggle != nullptr) {
+        ReplaySystem::get_instance().showcase_mode = !toggle->isOn();
     }
 }
