@@ -139,6 +139,8 @@ void ReplaySystem::_update_status_label() {
         switch (state) {
             case NOTHING:
                 label->setString("");
+                if (recorder.m_recording && (!recorder.m_until_end || from_offset<bool>(play_layer, 0x4BD)))
+                    recorder.stop();
                 break;
             case RECORDING:
                 label->setString("Recording");
@@ -147,8 +149,7 @@ void ReplaySystem::_update_status_label() {
                 label->setString(showcase_mode ? "" : "Playing");
                 break;
         }
-        if (state == PLAYING) {
-            recorder.start();
-        }
+    } else if (recorder.m_recording) {
+        recorder.stop();
     }
 }

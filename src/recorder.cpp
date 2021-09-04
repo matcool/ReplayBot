@@ -3,8 +3,6 @@
 #include <CCGL.h>
 
 Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
-// Recorder::Recorder() : m_width(400), m_height(300), m_fps(30) {}
-
 
 void Recorder::start() {
     m_recording = true;
@@ -16,15 +14,14 @@ void Recorder::start() {
     std::thread([&]() {
         std::cout << "in da thread" << std::endl;
         std::stringstream stream;
-        stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps << " -i - -c:v h264_amf -b:v 50M -vf \"vflip\" -an fuckfuckfuck.mp4";
-        // m_process = subprocess::Popen(stream.str());
+        stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
+        << " -i - -c:v h264_amf -b:v 50M -vf \"vflip\" -an \"" << m_output_path << "\" "; // i hope just putting it in "" escapes it
         std::cout << "i will now create process" << std::endl;
         auto process = subprocess::Popen(stream.str());
         while (m_recording) {
             m_lock.lock();
             if (!m_frames.empty()) {
                 const auto& frame = m_frames.back();
-                // std::cout << "the size is: " << frame.size() << std::endl;
                 process.m_stdin.write(frame.data(), frame.size());
                 m_frames.pop();
             }
@@ -36,27 +33,20 @@ void Recorder::start() {
 }
 
 void Recorder::stop() {
+    std::cout << "stopping renderer" << std::endl;
     m_renderer.end();
     m_recording = false;
-    // m_process.close(false);
 }
-
-// void Recorder::add_frame(const std::vector<u8>& frame) {
-//     m_process.m_stdin.write(frame.data(), frame.size());
-// }
 
 void MyRenderTexture::begin() {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &m_old_fbo);
 
     m_texture = new CCTexture2D;
     {
-        std::vector<u8> data;
-        data.resize(m_width * m_height * 3, 0);
-        // auto data = malloc(m_width * m_height * 3);
-        // memset(data, 0, m_width * m_height * 3);
-        // dynamic_array<u8> data(m_width * m_height * 3);
-        m_texture->initWithData(data.data(), kCCTexture2DPixelFormat_RGB888, m_width, m_height, CCSize(m_width, m_height));
-        // free(data);
+        auto data = malloc(m_width * m_height * 3);
+        memset(data, 0, m_width * m_height * 3);
+        m_texture->initWithData(data, kCCTexture2DPixelFormat_RGB888, m_width, m_height, CCSize(m_width, m_height));
+        free(data);
     }
 
     glGetIntegerv(GL_RENDERBUFFER_BINDING_EXT, &m_old_rbo);
@@ -72,12 +62,6 @@ void MyRenderTexture::begin() {
 
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_old_rbo);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_old_fbo);
-
-    // begin()
-    // glViewport(0, 0, m_width, m_height);
-
-    // glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &m_old_fbo);
-    // glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
 }
 
 std::vector<u8> MyRenderTexture::capture() {
@@ -102,9 +86,6 @@ std::vector<u8> MyRenderTexture::capture() {
 }
 
 void MyRenderTexture::end() {
-    // auto director = CCDirector::sharedDirector();
-    // glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_old_fbo);
-    // director->setViewport();
     m_texture->release();
 }
 
@@ -113,5 +94,4 @@ void Recorder::capture_frame() {
     m_lock.lock();
     m_frames.push(frame);
     m_lock.unlock();
-    // m_process.m_stdin.write(frame.data(), m_width * m_height * 3);
 }

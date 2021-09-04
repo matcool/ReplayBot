@@ -45,6 +45,8 @@ public:
     void on_toggle_real_time(CCObject*);
     void on_toggle_showcase(CCObject*);
 
+    void on_recorder(CCObject*);
+
     virtual void keyBackClicked();
     virtual void keyDown(enumKeyCodes key) {
         // keyDown overwrites keyBackClicked, how fun

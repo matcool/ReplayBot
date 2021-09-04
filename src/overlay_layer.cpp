@@ -2,6 +2,7 @@
 #include "replay_system.hpp"
 #include <nfd.h>
 #include <sstream>
+#include "recorder_layer.hpp"
 
 bool OverlayLayer::init() {
     if (!initWithColor({ 0, 0, 0, 105 })) return false;
@@ -120,6 +121,10 @@ bool OverlayLayer::init() {
     label->setScale(0.6f);
     label->setPosition({win_size.width - 55, win_size.height - 225});
     addChild(label);
+
+    btn = gd::CCMenuItemSpriteExtra::create(CCSprite::create("GJ_button_01.png"), this, menu_selector(OverlayLayer::on_recorder));
+    btn->setPosition({win_size.width - 35, -275});
+    menu->addChild(btn);
 
     sprite = CCSprite::create("square02b_001.png");
     sprite->setColor({0, 0, 0});
@@ -281,4 +286,8 @@ void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
     if (toggle != nullptr) {
         ReplaySystem::get_instance().showcase_mode = !toggle->isOn();
     }
+}
+
+void OverlayLayer::on_recorder(CCObject*) {
+    RecorderLayer::create()->show();
 }

@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include "../libraries/subprocess.hpp"
+#include <string>
 
 using u8 = uint8_t;
 
@@ -56,9 +57,10 @@ public:
     unsigned m_fps;
     bool m_recording = false;
     float m_last_frame_t, m_extra_t;
+    bool m_until_end = true;
+    std::string m_output_path = "recording.mp4";
 
     void start();
     void stop();
-    void add_frame(const std::vector<u8>& data);
     void capture_frame();
 };

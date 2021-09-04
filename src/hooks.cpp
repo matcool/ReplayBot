@@ -74,7 +74,7 @@ void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
             //     g_disable_render = false;
             CCScheduler_update(self, target_dt);
             using namespace std::literals;
-            if (std::chrono::high_resolution_clock::now() - start > 16.666ms) {
+            if (std::chrono::high_resolution_clock::now() - start > 33.333ms) {
                 times = i + 1;
                 break;
             }
@@ -116,10 +116,11 @@ void __fastcall Hooks::PlayLayer::update_H(gd::PlayLayer* self, int, float dt) {
         // is menu thing open
         if (!from_offset<bool>(self, 0x4BD)) {
             auto frame_dt = 1.f / static_cast<float>(rs.recorder.m_fps);
-            auto time = self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t;
+            auto time = static_cast<float>(self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t);
             if (time >= frame_dt) {
+                gd::FMODAudioEngine::sharedEngine()->setBackgroundMusicTime(self->m_time + from_offset<float>(self->m_levelSettings, 0xfc));
                 rs.recorder.m_extra_t = time - frame_dt;
-                rs.recorder.m_last_frame_t = self->m_time;
+                rs.recorder.m_last_frame_t = static_cast<float>(self->m_time);
                 rs.recorder.capture_frame();
             }
         } else {
