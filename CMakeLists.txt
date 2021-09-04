@@ -38,4 +38,6 @@ target_link_libraries(replay-bot
   minhook
   ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/libcocos2d.lib
   ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/extensions/libExtensions.lib
+  opengl32
+  ${CMAKE_SOURCE_DIR}/libraries/glew32.lib
 )

@@ -1,6 +1,8 @@
 #include "hooks.hpp"
 #include "replay_system.hpp"
 #include "overlay_layer.hpp"
+#include "recorder.hpp"
+#include <chrono>
 
 auto add_gd_hook(uintptr_t offset, void* hook, void* orig) {
     return MH_CreateHook(cast<void*>(gd::base + offset), hook, cast<void**>(orig));
@@ -46,7 +48,7 @@ float g_left_over = 0.f;
 
 void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
     auto& rs = ReplaySystem::get_instance();
-    if (rs.is_playing() || rs.is_recording() && gd::GameManager::sharedState()->getPlayLayer()) {
+    if (rs.recorder.m_recording || rs.is_playing() || rs.is_recording() && gd::GameManager::sharedState()->getPlayLayer()) {
         const auto fps = rs.get_replay().get_fps();
         auto speedhack = self->getTimeScale();
 
@@ -56,19 +58,26 @@ void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
             return CCScheduler_update(self, target_dt);
 
         // todo: find ways to disable more render stuff
-        g_disable_render = true;
+        g_disable_render = false;
 
         // TODO: not have this min()
         // doing the commented out if below causes really weird stutters for some reason
-        const int times = min(static_cast<int>((dt + g_left_over) / target_dt), 150);
+        // const int times = min(static_cast<int>((dt + g_left_over) / target_dt), 150);
+        unsigned times = static_cast<int>((dt + g_left_over) / target_dt);
         // if the fps is really low then dont run it a lot of times
         // if (dt > 1.f / 10.f) {
         //     times = min(times, 100);
         // }
-        for (int i = 0; i < times; ++i) {
-            if (i == times - 1)
-                g_disable_render = false;
+        auto start = std::chrono::high_resolution_clock::now();
+        for (unsigned i = 0; i < times; ++i) {
+            // if (i == times - 1)
+            //     g_disable_render = false;
             CCScheduler_update(self, target_dt);
+            using namespace std::literals;
+            if (std::chrono::high_resolution_clock::now() - start > 16.666ms) {
+                times = i + 1;
+                break;
+            }
         }
         g_left_over += dt - target_dt * times;
     } else {
@@ -95,7 +104,6 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDisp
     CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
 }
 
-
 bool __fastcall Hooks::PlayLayer::init_H(gd::PlayLayer* self, int, void* level) {
     return init(self, level);
 }
@@ -103,8 +111,21 @@ bool __fastcall Hooks::PlayLayer::init_H(gd::PlayLayer* self, int, void* level) 
 void __fastcall Hooks::PlayLayer::update_H(gd::PlayLayer* self, int, float dt) {
     auto& rs = ReplaySystem::get_instance();
     if (rs.get_frame_advance()) return;
-    if (rs.is_playing())
-        rs.handle_playing();
+    if (rs.is_playing()) rs.handle_playing();
+    if (rs.recorder.m_recording) {
+        // is menu thing open
+        if (!from_offset<bool>(self, 0x4BD)) {
+            auto frame_dt = 1.f / static_cast<float>(rs.recorder.m_fps);
+            auto time = self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t;
+            if (time >= frame_dt) {
+                rs.recorder.m_extra_t = time - frame_dt;
+                rs.recorder.m_last_frame_t = self->m_time;
+                rs.recorder.capture_frame();
+            }
+        } else {
+            rs.recorder.stop();
+        }
+    }
     update(self, dt);
 }
 

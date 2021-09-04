@@ -1,6 +1,7 @@
 #pragma once
 #include "replay.hpp"
 #include "practice_fixes.hpp"
+#include "recorder.hpp"
 
 // this is a rly bad name
 enum RSState {
@@ -81,4 +82,5 @@ public:
 
     bool real_time_mode = true; // fuck it we going public
     bool showcase_mode = false;
+    Recorder recorder;
 };

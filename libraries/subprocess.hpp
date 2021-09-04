@@ -1,0 +1,89 @@
+#pragma once
+#include <Windows.h>
+#include <string>
+
+namespace subprocess {
+
+    struct PipeHandle {
+        HANDLE handle;
+
+        void set_inherit(bool value) {
+            SetHandleInformation(handle, HANDLE_FLAG_INHERIT, value * HANDLE_FLAG_INHERIT);
+        }
+
+        void close() {
+            CloseHandle(handle);
+        }
+    };
+
+    struct PipePair {
+        PipeHandle m_read;
+        PipeHandle m_write;
+
+        static PipePair create(bool inheritable) {
+            SECURITY_ATTRIBUTES security = {0};
+            security.nLength = sizeof(security);
+            security.bInheritHandle = inheritable;
+            HANDLE read, write;
+            CreatePipe(&read, &write, &security, 0);
+            return {read, write};
+        }
+
+        void write(const void* const data, size_t size) {
+            WriteFile(m_write.handle, data, size, nullptr, nullptr);
+        }
+
+        void close() {
+            m_read.close();
+            m_write.close();
+        }
+    };
+
+    class Popen {
+    public:
+        PipePair m_stdin;
+        PipePair m_stdout;
+        PROCESS_INFORMATION m_proc_info;
+    public:
+        Popen() {}
+        Popen(const std::string& command) {
+            SECURITY_ATTRIBUTES sec_attrs = {0};
+
+            sec_attrs.nLength = sizeof(sec_attrs);
+            sec_attrs.bInheritHandle = true;
+            sec_attrs.lpSecurityDescriptor = nullptr;
+
+            m_proc_info = {0};
+            STARTUPINFOA start_info = {0};
+
+            start_info.cb = sizeof(start_info);
+            start_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+            start_info.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+            start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+            start_info.dwFlags |= STARTF_USESTDHANDLES;
+
+            m_stdin = PipePair::create(true);
+            start_info.hStdInput = m_stdin.m_read.handle;
+            m_stdin.m_write.set_inherit(false);
+
+            CreateProcessA(nullptr, const_cast<char*>(command.c_str()), nullptr, nullptr, true, 0, nullptr, nullptr, &start_info, &m_proc_info);
+
+            m_stdin.m_read.close();
+        }
+
+        int wait() {
+            DWORD result = WaitForSingleObject(m_proc_info.hProcess, INFINITE);
+            DWORD exit_code;
+            GetExitCodeProcess(m_proc_info.hProcess, &exit_code);
+            return exit_code;
+        }
+
+        void close(bool should_wait = true) {
+            m_stdin.close();
+            m_stdout.close();
+            if (should_wait) wait();
+            CloseHandle(m_proc_info.hProcess);
+            CloseHandle(m_proc_info.hThread);
+        }
+    };
+}

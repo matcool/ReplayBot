@@ -147,5 +147,8 @@ void ReplaySystem::_update_status_label() {
                 label->setString(showcase_mode ? "" : "Playing");
                 break;
         }
+        if (state == PLAYING) {
+            recorder.start();
+        }
     }
 }
