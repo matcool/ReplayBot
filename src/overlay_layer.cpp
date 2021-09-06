@@ -3,6 +3,7 @@
 #include <nfd.h>
 #include <sstream>
 #include "recorder_layer.hpp"
+#include "nodes.hpp"
 
 bool OverlayLayer::init() {
     if (!initWithColor({ 0, 0, 0, 105 })) return false;
@@ -123,8 +124,27 @@ bool OverlayLayer::init() {
     addChild(label);
 
     btn = gd::CCMenuItemSpriteExtra::create(CCSprite::create("GJ_button_01.png"), this, menu_selector(OverlayLayer::on_recorder));
-    btn->setPosition({win_size.width - 35, -275});
+    {
+        auto draw_node = CCDrawNode::create();
+        constexpr size_t n_verts = 16;
+        constexpr float radius = 13.f;
+        CCPoint verts[n_verts];
+        for (size_t i = 0; i < n_verts; ++i) {
+            verts[i] = CCPoint::forAngle(static_cast<float>(i) / n_verts * 6.2831f) * radius;
+        }
+        draw_node->drawPolygon(verts, n_verts, {1.f, 0.f, 0.f, 1.f}, 1.f, {0.f, 0.f, 0.f, 1.f});
+        btn->getNormalImage()->addChild(draw_node);
+        draw_node->setPosition(btn->getNormalImage()->getContentSize() / 2.f);
+    }
+    btn->getNormalImage()->setScale(0.775f);
+    btn->setPosition({win_size.width - 35, -260});
     menu->addChild(btn);
+
+    addChild(NodeFactory<CCLabelBMFont>::start("Internal Recorder", "bigFont.fnt")
+        .setAnchorPoint(ccp(1, 0.5))
+        .setScale(0.6f)
+        .setPosition(win_size - ccp(55, 260))
+    );
 
     sprite = CCSprite::create("square02b_001.png");
     sprite->setColor({0, 0, 0});

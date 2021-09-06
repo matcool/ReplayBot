@@ -89,6 +89,7 @@ public:
     _gen_func(setContentSize)
     _gen_func(setOpacity)
     _gen_func(setZOrder)
+    _gen_func(setAnchorPoint)
 
     #undef _gen_func
 };
