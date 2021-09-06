@@ -49,7 +49,6 @@ public:
 class Recorder {
 public:
     Recorder();
-    // subprocess::Popen m_process;
     std::queue<std::vector<u8>> m_frames;
     std::mutex m_lock;
     MyRenderTexture m_renderer;
@@ -58,9 +57,9 @@ public:
     bool m_recording = false;
     float m_last_frame_t, m_extra_t;
     bool m_until_end = true;
-    std::string m_output_path = "recording.mp4";
+    std::string m_codec = "", m_bitrate = "30M", m_extra_args = "";
 
-    void start();
+    void start(const std::string& path);
     void stop();
     void capture_frame();
 };

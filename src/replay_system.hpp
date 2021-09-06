@@ -23,7 +23,7 @@ class ReplaySystem {
 
     bool frame_advance = false;
 
-    ReplaySystem() : default_fps(120.f), replay(default_fps), default_type(replay.get_type()) {}
+    ReplaySystem() : default_fps(240.f), replay(default_fps), default_type(replay.get_type()) {}
 
     void _update_status_label();
 

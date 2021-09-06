@@ -4,6 +4,8 @@
 
 class RecorderLayer : public gd::FLAlertLayer {
 public:
+    CCLabelBMFont* m_path_label;
+
     static auto create() {
         auto node = new RecorderLayer;
         if (node && node->init()) {
@@ -18,5 +20,4 @@ public:
     void on_close(CCObject*);
     void on_toggle_recorder(CCObject*);
     void on_toggle_until_end(CCObject*);
-    void on_pick_path(CCObject*);
 };

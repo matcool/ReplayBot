@@ -57,7 +57,6 @@ namespace subprocess {
             STARTUPINFOA start_info = {0};
 
             start_info.cb = sizeof(start_info);
-            start_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
             start_info.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
             start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
             start_info.dwFlags |= STARTF_USESTDHANDLES;
@@ -78,12 +77,14 @@ namespace subprocess {
             return exit_code;
         }
 
-        void close(bool should_wait = true) {
+        int close(bool should_wait = true) {
+            int exit_code = 0;
             m_stdin.close();
             m_stdout.close();
-            if (should_wait) wait();
+            if (should_wait) exit_code = wait();
             CloseHandle(m_proc_info.hProcess);
             CloseHandle(m_proc_info.hThread);
+            return exit_code;
         }
     };
 }

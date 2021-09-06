@@ -289,5 +289,16 @@ void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
 }
 
 void OverlayLayer::on_recorder(CCObject*) {
+    static bool has_ffmpeg = false;
+    if (!has_ffmpeg) {
+        // theres prob a way to do it by not spawning a process but im lazy and hate dealing with winapi
+        auto process = subprocess::Popen("where ffmpeg");
+        if (process.close())
+            gd::FLAlertLayer::create(nullptr, "Error", "Ok", nullptr, "ffmpeg was not found in your path, recorder will not work without it")->show();
+        else
+            has_ffmpeg = true;
+        if (!has_ffmpeg)
+            return;
+    }
     RecorderLayer::create()->show();
 }

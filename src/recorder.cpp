@@ -4,19 +4,23 @@
 
 Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
 
-void Recorder::start() {
+void Recorder::start(const std::string& path) {
     m_recording = true;
     m_last_frame_t = m_extra_t = 0;
     m_renderer.m_width = m_width;
     m_renderer.m_height = m_height;
     m_renderer.begin();
-    std::cout << "i will now create da thread" << std::endl;
-    std::thread([&]() {
-        std::cout << "in da thread" << std::endl;
+    std::thread([&, path]() {
         std::stringstream stream;
         stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
-        << " -i - -c:v h264_amf -b:v 50M -vf \"vflip\" -an \"" << m_output_path << "\" "; // i hope just putting it in "" escapes it
-        std::cout << "i will now create process" << std::endl;
+        << " -i - "; 
+        if (!m_codec.empty())
+            stream << "-c:v " << m_codec << " ";
+        if (!m_bitrate.empty())
+            stream << "-b:v " << m_bitrate << " ";
+        if (!m_extra_args.empty())
+            stream << m_extra_args << " ";
+        stream << "-vf \"vflip\" -an \"" << path << "\" "; // i hope just putting it in "" escapes it
         auto process = subprocess::Popen(stream.str());
         while (m_recording) {
             m_lock.lock();
@@ -33,7 +37,6 @@ void Recorder::start() {
 }
 
 void Recorder::stop() {
-    std::cout << "stopping renderer" << std::endl;
     m_renderer.end();
     m_recording = false;
 }
