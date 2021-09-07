@@ -34,7 +34,7 @@ bool RecorderLayer::init() {
     auto toggler = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(RecorderLayer::on_toggle_recorder));
     toggler->setPosition(top_left + ccp(30.f, -30.f));
     toggler->toggle(rs.recorder.m_recording);
-    auto label = CCLabelBMFont::create("Record", "bigFont.fnt");
+    auto label = CCLabelBMFont::create("Render", "bigFont.fnt");
     label->setPosition(top_left + ccp(55.f, -30.f));
     label->setScale(0.7f);
     label->setAnchorPoint({0, 0.5f});
@@ -44,7 +44,7 @@ bool RecorderLayer::init() {
     toggler = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(RecorderLayer::on_toggle_until_end));
     toggler->setPosition(top_left + ccp(30.f, -65.f));
     toggler->toggle(rs.recorder.m_until_end);
-    label = CCLabelBMFont::create("Record until the end", "bigFont.fnt");
+    label = CCLabelBMFont::create("Render until the end", "bigFont.fnt");
     label->setScale(0.7f);
     label->setPosition(top_left + ccp(55.f, -65.f));
     label->setAnchorPoint({0, 0.5f});

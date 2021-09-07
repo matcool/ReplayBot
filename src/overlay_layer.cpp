@@ -140,7 +140,7 @@ bool OverlayLayer::init() {
     btn->setPosition({win_size.width - 35, -260});
     menu->addChild(btn);
 
-    addChild(NodeFactory<CCLabelBMFont>::start("Internal Recorder", "bigFont.fnt")
+    addChild(NodeFactory<CCLabelBMFont>::start("Internal Renderer", "bigFont.fnt")
         .setAnchorPoint(ccp(1, 0.5))
         .setScale(0.6f)
         .setPosition(win_size - ccp(55, 260))
