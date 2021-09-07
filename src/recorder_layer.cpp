@@ -86,7 +86,7 @@ bool RecorderLayer::init() {
     };
     layer->addChild(input);
 
-    const std::string broad_filter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;-_=+@!\":0123456789$[](){}";
+    const std::string broad_filter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;-_=+@!\":0123456789$[](){} ";
 
     auto text_input = TextInputNode::create(CCSize(60.f, 30.f), 1.f, "chatFont.fnt");
     text_input->setPosition(top_left + ccp(291.5f, -177.f));
