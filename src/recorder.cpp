@@ -20,6 +20,8 @@ void Recorder::start(const std::string& path) {
             stream << "-b:v " << m_bitrate << " ";
         if (!m_extra_args.empty())
             stream << m_extra_args << " ";
+        else
+            stream << "-pix_fmt yuv420p ";
         stream << "-vf \"vflip\" -an \"" << path << "\" "; // i hope just putting it in "" escapes it
         auto process = subprocess::Popen(stream.str());
         while (m_recording) {
