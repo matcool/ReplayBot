@@ -50,7 +50,7 @@ void MyRenderTexture::begin() {
     {
         auto data = malloc(m_width * m_height * 3);
         memset(data, 0, m_width * m_height * 3);
-        m_texture->initWithData(data, kCCTexture2DPixelFormat_RGB888, m_width, m_height, CCSize(m_width, m_height));
+        m_texture->initWithData(data, kCCTexture2DPixelFormat_RGB888, m_width, m_height, CCSize(static_cast<float>(m_width), static_cast<float>(m_height)));
         free(data);
     }
 

@@ -18,7 +18,6 @@ namespace Hooks {
     _FASTCALL_HOOK(CheckpointObject_create, CCObject*)
     
     namespace PlayLayer {
-        _THISCALL_HOOK(init, bool, gd::PlayLayer, void* level)
         _THISCALL_HOOK(update, void, gd::PlayLayer, float dt)
 
         _THISCALL_HOOK(pushButton, int, gd::PlayLayer, int, bool)

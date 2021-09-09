@@ -55,7 +55,7 @@ public:
     unsigned m_width, m_height;
     unsigned m_fps;
     bool m_recording = false;
-    float m_last_frame_t, m_extra_t;
+    double m_last_frame_t, m_extra_t;
     bool m_until_end = true;
     std::string m_codec = "", m_bitrate = "30M", m_extra_args = "";
 

@@ -19,7 +19,6 @@ void Hooks::init() {
     ADD_COCOS_HOOK("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z", CCKeyboardDispatcher_dispatchKeyboardMSG);
     ADD_GD_HOOK(0x20ddd0, CheckpointObject_create);
 
-    ADD_GD_HOOK(0x1FB780, PlayLayer::init);
     ADD_GD_HOOK(0x2029C0, PlayLayer::update);
 
     ADD_GD_HOOK(0x111500, PlayLayer::pushButton);
@@ -104,23 +103,19 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDisp
     CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
 }
 
-bool __fastcall Hooks::PlayLayer::init_H(gd::PlayLayer* self, int, void* level) {
-    return init(self, level);
-}
-
 void __fastcall Hooks::PlayLayer::update_H(gd::PlayLayer* self, int, float dt) {
     auto& rs = ReplaySystem::get_instance();
     if (rs.get_frame_advance()) return;
     if (rs.is_playing()) rs.handle_playing();
     if (rs.recorder.m_recording) {
         // is menu thing open
-        if (!from_offset<bool>(self, 0x4BD)) {
-            auto frame_dt = 1.f / static_cast<float>(rs.recorder.m_fps);
-            auto time = static_cast<float>(self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t);
+        if (self->m_hasLevelCompleteMenu) {
+            auto frame_dt = 1. / static_cast<double>(rs.recorder.m_fps);
+            auto time = self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t;
             if (time >= frame_dt) {
                 gd::FMODAudioEngine::sharedEngine()->setBackgroundMusicTime(self->m_time + from_offset<float>(self->m_levelSettings, 0xfc));
                 rs.recorder.m_extra_t = time - frame_dt;
-                rs.recorder.m_last_frame_t = static_cast<float>(self->m_time);
+                rs.recorder.m_last_frame_t = self->m_time;
                 rs.recorder.capture_frame();
             }
         } else {
