@@ -7,6 +7,7 @@
 [submodule "libraries/nfd"]
 	path = libraries/nfd
 	url = https://github.com/mlabbe/nativefiledialog
+	branch = devel
 [submodule "libraries/cocos-headers"]
 	path = libraries/cocos-headers
 	url = https://github.com/HJfod/cocos-headers.git

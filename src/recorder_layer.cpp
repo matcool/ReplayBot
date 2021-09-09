@@ -157,13 +157,12 @@ void RecorderLayer::on_toggle_recorder(CCObject* obj) {
         rs.recorder.stop();
     } else {
         nfdchar_t* path = nullptr;
-        if (NFD_SaveDialog("mp4", nullptr, &path) == NFD_OKAY) {
+        if (NFD_SaveDialog("mp4;mkv;webm", nullptr, &path) == NFD_OKAY) {
             // TODO: warn the user? idk theyre kinda dumb
             if (!rs.is_playing())
                 rs.toggle_playing();
-            std::string p = std::string(path) + ".mp4";
-            std::cout << "saving it to " << p << std::endl;
-            rs.recorder.start(p);
+            std::cout << "saving it to " << path << std::endl;
+            rs.recorder.start(path);
             free(path);
         } else {
             // toggle it on so then gd does !on and then turns it off then boom success

@@ -3,8 +3,6 @@
 
 #include "hooks.hpp"
 
-// #define SHOW_CONSOLE
-
 DWORD WINAPI thread_entry(void* module) {
 #ifdef SHOW_CONSOLE
     AllocConsole();

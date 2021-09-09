@@ -243,9 +243,7 @@ void OverlayLayer::on_save(CCObject*) {
     nfdchar_t* path = nullptr;
     auto result = NFD_SaveDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
-        std::string s_path(path);
-        // why doesnt it just add the extension for me
-        ReplaySystem::get_instance().get_replay().save(s_path + ".replay");
+        ReplaySystem::get_instance().get_replay().save(path);
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay saved.")->show();
         free(path);
     }
