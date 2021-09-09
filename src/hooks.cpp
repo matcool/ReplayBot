@@ -103,17 +103,18 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG_H(CCKeyboardDisp
     CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
 }
 
+float g_xpos_time = 0.f;
+
 void __fastcall Hooks::PlayLayer::update_H(gd::PlayLayer* self, int, float dt) {
     auto& rs = ReplaySystem::get_instance();
     if (rs.get_frame_advance()) return;
     if (rs.is_playing()) rs.handle_playing();
     if (rs.recorder.m_recording) {
-        // is menu thing open
-        if (self->m_hasLevelCompleteMenu) {
+        if (!self->m_hasLevelCompleteMenu) {
             auto frame_dt = 1. / static_cast<double>(rs.recorder.m_fps);
             auto time = self->m_time + rs.recorder.m_extra_t - rs.recorder.m_last_frame_t;
             if (time >= frame_dt) {
-                gd::FMODAudioEngine::sharedEngine()->setBackgroundMusicTime(self->m_time + from_offset<float>(self->m_levelSettings, 0xfc));
+                gd::FMODAudioEngine::sharedEngine()->setBackgroundMusicTime(self->m_time + from_offset<float>(self->m_levelSettings, 0xfc) + g_xpos_time);
                 rs.recorder.m_extra_t = time - frame_dt;
                 rs.recorder.m_last_frame_t = self->m_time;
                 rs.recorder.capture_frame();
@@ -147,7 +148,11 @@ int __fastcall Hooks::PlayLayer::releaseButton_H(gd::PlayLayer* self, int, int i
 
 int __fastcall Hooks::PlayLayer::resetLevel_H(gd::PlayLayer* self, int) {
     auto ret = resetLevel(self);
-    ReplaySystem::get_instance().on_reset();
+    auto& rs = ReplaySystem::get_instance();
+    rs.on_reset();
+    // from what i've checked rob doesnt store this anywhere, so i have to calculate it again
+    if (rs.recorder.m_recording)
+        g_xpos_time = self->timeForXPos2(self->m_player1->m_position.x, self->m_isTestMode);
     return ret;
 }
 
