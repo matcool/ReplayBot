@@ -6,11 +6,18 @@ Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
 
 void Recorder::start(const std::string& path) {
     m_recording = true;
+    m_finished_level = false;
     m_last_frame_t = m_extra_t = 0;
+    m_after_end_extra_time = 0.f;
     m_renderer.m_width = m_width;
     m_renderer.m_height = m_height;
     m_renderer.begin();
-    std::thread([&, path]() {
+    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
+    auto song_file = play_layer->m_level->getAudioFileName();
+    // these are always false???
+    auto fade_in = play_layer->m_levelSettings->m_fadeIn;
+    auto fade_out = play_layer->m_levelSettings->m_fadeOut;
+    std::thread([&, path, song_file]() {
         std::stringstream stream;
         stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
         << " -i - "; 
@@ -23,6 +30,7 @@ void Recorder::start(const std::string& path) {
         else
             stream << "-pix_fmt yuv420p ";
         stream << "-vf \"vflip\" -an \"" << path << "\" "; // i hope just putting it in "" escapes it
+        std::cout << "executing: " << stream.str() << std::endl;
         auto process = subprocess::Popen(stream.str());
         while (m_recording) {
             m_lock.lock();
@@ -35,6 +43,20 @@ void Recorder::start(const std::string& path) {
         }
         process.close();
         std::cout << "should be done now!" << std::endl;
+        std::cout << "sike" << std::endl;
+        auto total_time = m_last_frame_t; // 1 frame too short?
+        {
+            std::stringstream stream;
+            stream << "ffmpeg -y -ss " << m_song_start_offset << " -i \"" << song_file
+            << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy "
+            << "-filter:a \"";
+            std::cout << "in " << fade_in << " out " << fade_out << std::endl;
+            stream << "afade=t=in:d=0.5[out];[out]afade=t=out:d=0.5:st=" << (total_time - 0.5f - 3.f - 1.f);
+            stream << "\" " << path << ".sound.mp4";
+            std::cout << "executing: " << stream.str() << std::endl;
+            auto process = subprocess::Popen(stream.str());
+            process.close();
+        }
     }).detach();
 }
 
@@ -99,4 +121,24 @@ void Recorder::capture_frame() {
     m_lock.lock();
     m_frames.push(frame);
     m_lock.unlock();
+}
+
+void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
+    if (!play_layer->m_hasLevelCompleteMenu || m_after_end_extra_time < 3.f) {
+        if (play_layer->m_hasLevelCompleteMenu) {
+            m_after_end_extra_time += dt;
+            m_finished_level = true;
+        }
+        auto frame_dt = 1. / static_cast<double>(m_fps);
+        auto time = play_layer->m_time + m_extra_t - m_last_frame_t;
+        if (time >= frame_dt) {
+            gd::FMODAudioEngine::sharedEngine()->setBackgroundMusicTime(
+                play_layer->m_time + m_song_start_offset);
+            m_extra_t = time - frame_dt;
+            m_last_frame_t = play_layer->m_time;
+            capture_frame();
+        }
+    } else {
+        stop();
+    }
 }

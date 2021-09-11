@@ -58,8 +58,12 @@ public:
     double m_last_frame_t, m_extra_t;
     bool m_until_end = true;
     std::string m_codec = "", m_bitrate = "30M", m_extra_args = "";
+    float m_after_end_extra_time;
+    float m_song_start_offset;
+    bool m_finished_level;
 
     void start(const std::string& path);
     void stop();
     void capture_frame();
+    void handle_recording(gd::PlayLayer*, float dt);
 };
