@@ -1,8 +1,11 @@
 #include "recorder.hpp"
 #include <sstream>
 #include <CCGL.h>
+#include <filesystem>
 
 Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
+
+const float extra_length_at_the_end = 3.f;
 
 void Recorder::start(const std::string& path) {
     m_recording = true;
@@ -12,12 +15,16 @@ void Recorder::start(const std::string& path) {
     m_renderer.m_width = m_width;
     m_renderer.m_height = m_height;
     m_renderer.begin();
-    auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
+    auto gm = gd::GameManager::sharedState();
+    auto play_layer = gm->getPlayLayer();
     auto song_file = play_layer->m_level->getAudioFileName();
-    // these are always false???
     auto fade_in = play_layer->m_levelSettings->m_fadeIn;
     auto fade_out = play_layer->m_levelSettings->m_fadeOut;
-    std::thread([&, path, song_file]() {
+    auto bg_volume = gm->m_fBackgroundMusicVolume;
+    auto sfx_volume = gm->m_fEffectsVolume;
+    if (play_layer->m_level->songID == 0)
+        song_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(song_file.c_str(), false);
+    std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume]() {
         std::stringstream stream;
         stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
         << " -i - "; 
@@ -41,22 +48,41 @@ void Recorder::start(const std::string& path) {
             }
             m_lock.unlock();
         }
-        process.close();
+        if (process.close()) {
+            std::cout << "ffmpeg errored :(" << std::endl;
+            return;
+        }
         std::cout << "should be done now!" << std::endl;
+        if (!std::filesystem::exists(song_file)) return;
         std::cout << "sike" << std::endl;
+        char buffer[MAX_PATH];
+        if (!GetTempFileNameA(std::filesystem::temp_directory_path().string().c_str(), "rec", 0, buffer)) {
+            std::cout << "error getting temp file" << std::endl;
+            return;
+        }
+        auto temp_path = std::string(buffer) + "." + std::filesystem::path(path).filename().string();
+        std::filesystem::rename(buffer, temp_path);
         auto total_time = m_last_frame_t; // 1 frame too short?
         {
             std::stringstream stream;
             stream << "ffmpeg -y -ss " << m_song_start_offset << " -i \"" << song_file
             << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy "
-            << "-filter:a \"";
+            << "-filter:a \"volume=" << bg_volume << "[0:a]";
+            if (fade_in)
+                stream << ";[0:a]afade=t=in:d=2[0:a]";
+            if (fade_out)
+                stream << ";[0:a]afade=t=out:d=2:st=" << (total_time - extra_length_at_the_end - 3.5f) << "[0:a]";
             std::cout << "in " << fade_in << " out " << fade_out << std::endl;
-            stream << "afade=t=in:d=0.5[out];[out]afade=t=out:d=0.5:st=" << (total_time - 0.5f - 3.f - 1.f);
-            stream << "\" " << path << ".sound.mp4";
+            stream << "\" \"" << temp_path << "\"";
             std::cout << "executing: " << stream.str() << std::endl;
             auto process = subprocess::Popen(stream.str());
-            process.close();
+            if (process.close()) {
+                std::cout << "oh god adding the song went wrong cmon" << std::endl;
+                return;
+            }
         }
+        std::filesystem::remove(path);
+        std::filesystem::rename(temp_path, path);
     }).detach();
 }
 
@@ -124,7 +150,7 @@ void Recorder::capture_frame() {
 }
 
 void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
-    if (!play_layer->m_hasLevelCompleteMenu || m_after_end_extra_time < 3.f) {
+    if (!play_layer->m_hasLevelCompleteMenu || m_after_end_extra_time < extra_length_at_the_end) {
         if (play_layer->m_hasLevelCompleteMenu) {
             m_after_end_extra_time += dt;
             m_finished_level = true;
