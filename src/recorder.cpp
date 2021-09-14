@@ -5,8 +5,6 @@
 
 Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
 
-const float extra_length_at_the_end = 3.f;
-
 void Recorder::start(const std::string& path) {
     m_recording = true;
     m_finished_level = false;
@@ -24,7 +22,8 @@ void Recorder::start(const std::string& path) {
     auto sfx_volume = gm->m_fEffectsVolume;
     if (play_layer->m_level->songID == 0)
         song_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(song_file.c_str(), false);
-    std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume]() {
+    auto is_testmode = play_layer->m_isTestMode;
+    std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume, is_testmode]() {
         std::stringstream stream;
         stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
         << " -i - "; 
@@ -53,7 +52,7 @@ void Recorder::start(const std::string& path) {
             return;
         }
         std::cout << "should be done now!" << std::endl;
-        if (!std::filesystem::exists(song_file)) return;
+        if (!m_include_audio || !std::filesystem::exists(song_file)) return;
         std::cout << "sike" << std::endl;
         char buffer[MAX_PATH];
         if (!GetTempFileNameA(std::filesystem::temp_directory_path().string().c_str(), "rec", 0, buffer)) {
@@ -68,10 +67,10 @@ void Recorder::start(const std::string& path) {
             stream << "ffmpeg -y -ss " << m_song_start_offset << " -i \"" << song_file
             << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy "
             << "-filter:a \"volume=" << bg_volume << "[0:a]";
-            if (fade_in)
+            if (fade_in && !is_testmode)
                 stream << ";[0:a]afade=t=in:d=2[0:a]";
-            if (fade_out)
-                stream << ";[0:a]afade=t=out:d=2:st=" << (total_time - extra_length_at_the_end - 3.5f) << "[0:a]";
+            if (fade_out && m_finished_level)
+                stream << ";[0:a]afade=t=out:d=2:st=" << (total_time - m_after_end_duration - 3.5f) << "[0:a]";
             std::cout << "in " << fade_in << " out " << fade_out << std::endl;
             stream << "\" \"" << temp_path << "\"";
             std::cout << "executing: " << stream.str() << std::endl;
@@ -150,7 +149,7 @@ void Recorder::capture_frame() {
 }
 
 void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
-    if (!play_layer->m_hasLevelCompleteMenu || m_after_end_extra_time < extra_length_at_the_end) {
+    if (!play_layer->m_hasLevelCompleteMenu || m_after_end_extra_time < m_after_end_duration) {
         if (play_layer->m_hasLevelCompleteMenu) {
             m_after_end_extra_time += dt;
             m_finished_level = true;

@@ -20,4 +20,5 @@ public:
     void on_close(CCObject*);
     void on_toggle_recorder(CCObject*);
     void on_toggle_until_end(CCObject*);
+    void on_toggle_include_audio(CCObject*);
 };

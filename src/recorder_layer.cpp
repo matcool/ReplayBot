@@ -18,6 +18,9 @@ bool RecorderLayer::init() {
 
     const CCPoint top_left = win_size / 2.f - ccp(window_size.width / 2.f, -window_size.height / 2.f);
 
+    registerWithTouchDispatcher();
+    CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
+
     m_pButtonMenu = CCMenu::create();
     m_pButtonMenu->setPosition({0, 0});
     auto menu = m_pButtonMenu; // sorry m_pButtonMenu is too much to type
@@ -51,9 +54,18 @@ bool RecorderLayer::init() {
     menu->addChild(toggler);
     layer->addChild(label);
 
+    toggler = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(RecorderLayer::on_toggle_include_audio));
+    toggler->setPosition(top_left + ccp(30.f, -100.f));
+    toggler->toggle(rs.recorder.m_include_audio);
+    menu->addChild(toggler);
+    layer->addChild(NodeFactory<CCLabelBMFont>::start("Include audio", "bigFont.fnt")
+                    .setScale(0.7f)
+                    .setPosition(top_left + ccp(55.f, -100.f))
+                    .setAnchorPoint(ccp(0, 0.5f)));
+
     auto input = NumberInputNode::create(CCSize(70.f, 30.f));
     input->set_value(rs.recorder.m_width);
-    input->setPosition(top_left + ccp(49.f, -104.f));
+    input->setPosition(top_left + ccp(49.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
     input->callback = [&rs](auto input) {
         rs.recorder.m_width = input->get_value();
@@ -61,12 +73,12 @@ bool RecorderLayer::init() {
     layer->addChild(input);
 
     layer->addChild(NodeFactory<CCLabelBMFont>::start("x", "bigFont.fnt")
-                    .setPosition(top_left + ccp(93.5f, -104.f))
+                    .setPosition(top_left + ccp(93.5f, -138.f))
                     .setScale(0.5f));
 
     input = NumberInputNode::create(CCSize(70.f, 30.f));
     input->set_value(rs.recorder.m_height);
-    input->setPosition(top_left + ccp(137.f, -104.f));
+    input->setPosition(top_left + ccp(137.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
     input->callback = [&rs](auto input) {
         rs.recorder.m_height = input->get_value();
@@ -74,17 +86,31 @@ bool RecorderLayer::init() {
     layer->addChild(input);
 
     layer->addChild(NodeFactory<CCLabelBMFont>::start("@", "bigFont.fnt")
-                    .setPosition(top_left + ccp(185.5f, -104.f))
+                    .setPosition(top_left + ccp(185.5f, -138.f))
                     .setScale(0.5f));
 
     input = NumberInputNode::create(CCSize(50.f, 30.f));
     input->set_value(rs.recorder.m_fps);
-    input->setPosition(top_left + ccp(225.f, -104.f));
+    input->setPosition(top_left + ccp(225.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
     input->callback = [&rs](auto input) {
         rs.recorder.m_fps = input->get_value();
     };
     layer->addChild(input);
+
+    input = NumberInputNode::create(CCSize(50.f, 30.f));
+    input->set_value(rs.recorder.m_after_end_duration);
+    input->setPosition(top_left + ccp(346.f, -65.f));
+    input->input_node->setMaxLabelScale(0.73f);
+    input->callback = [&rs](auto input) {
+        rs.recorder.m_after_end_duration = static_cast<float>(input->get_value());
+    };
+    layer->addChild(input);
+    layer->addChild(NodeFactory<CCLabelBMFont>::start("seconds to render after", "bigFont.fnt")
+                    .setPosition(top_left + ccp(346.f, -45.f))
+                    .setScale(0.224f));
+
+    layer->addChild(NodeFactory<CCNode>::start().setPosition(top_left));
 
     const std::string broad_filter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;-_=+@!\":0123456789$[](){} ";
 
@@ -121,9 +147,6 @@ bool RecorderLayer::init() {
 
     layer->addChild(NodeFactory<CCLabelBMFont>::start("Bitrate", "bigFont.fnt").setPosition(top_left + ccp(291.5f, -152.f)).setScale(0.4f));
     layer->addChild(NodeFactory<CCLabelBMFont>::start("Codec", "bigFont.fnt").setPosition(top_left + ccp(359.5f, -152.f)).setScale(0.4f));
-
-    registerWithTouchDispatcher();
-    CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
 
     auto close_btn = gd::CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"),
@@ -173,4 +196,8 @@ void RecorderLayer::on_toggle_recorder(CCObject* obj) {
 
 void RecorderLayer::on_toggle_until_end(CCObject* obj) {
     ReplaySystem::get_instance().recorder.m_until_end = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
+}
+
+void RecorderLayer::on_toggle_include_audio(CCObject* obj) {
+    ReplaySystem::get_instance().recorder.m_include_audio = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
 }
