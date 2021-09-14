@@ -2,10 +2,20 @@
 #include <sstream>
 #include <CCGL.h>
 #include <filesystem>
+#include <fstream>
 
 Recorder::Recorder() : m_width(1280), m_height(720), m_fps(60) {}
 
 void Recorder::start(const std::string& path) {
+#ifndef SHOW_CONSOLE
+    static bool has_console = false;
+    if (!has_console) {
+        has_console = true;
+        AllocConsole();
+        static std::ofstream conout("CONOUT$", std::ios::out);
+        std::cout.rdbuf(conout.rdbuf());
+    }
+#endif
     m_recording = true;
     m_finished_level = false;
     m_last_frame_t = m_extra_t = 0;
@@ -51,9 +61,8 @@ void Recorder::start(const std::string& path) {
             std::cout << "ffmpeg errored :(" << std::endl;
             return;
         }
-        std::cout << "should be done now!" << std::endl;
+        std::cout << "video should be done now" << std::endl;
         if (!m_include_audio || !std::filesystem::exists(song_file)) return;
-        std::cout << "sike" << std::endl;
         char buffer[MAX_PATH];
         if (!GetTempFileNameA(std::filesystem::temp_directory_path().string().c_str(), "rec", 0, buffer)) {
             std::cout << "error getting temp file" << std::endl;
@@ -82,6 +91,7 @@ void Recorder::start(const std::string& path) {
         }
         std::filesystem::remove(path);
         std::filesystem::rename(temp_path, path);
+        std::cout << "video + audio should be done now!" << std::endl;
     }).detach();
 }
 
