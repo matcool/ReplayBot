@@ -17,6 +17,8 @@ void Recorder::start(const std::string& path) {
     }
 #endif
     m_recording = true;
+    m_frame_has_data = false;
+    m_current_frame.resize(m_width * m_height * 3, 0);
     m_finished_level = false;
     m_last_frame_t = m_extra_t = 0;
     m_after_end_extra_time = 0.f;
@@ -48,14 +50,15 @@ void Recorder::start(const std::string& path) {
         stream << "-vf \"vflip\" -an \"" << path << "\" "; // i hope just putting it in "" escapes it
         std::cout << "executing: " << stream.str() << std::endl;
         auto process = subprocess::Popen(stream.str());
-        while (m_recording) {
+        while (m_recording || m_frame_has_data) {
             m_lock.lock();
-            if (!m_frames.empty()) {
-                const auto& frame = m_frames.back();
+            if (m_frame_has_data) {
+                const auto frame = m_current_frame; // copy it
+                m_frame_has_data = false;
+                m_lock.unlock();
                 process.m_stdin.write(frame.data(), frame.size());
-                m_frames.pop();
             }
-            m_lock.unlock();
+            else m_lock.unlock();
         }
         if (process.close()) {
             std::cout << "ffmpeg errored :(" << std::endl;
@@ -75,7 +78,7 @@ void Recorder::start(const std::string& path) {
             std::stringstream stream;
             stream << "ffmpeg -y -ss " << m_song_start_offset << " -i \"" << song_file
             << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy "
-            << "-filter:a \"volume=" << bg_volume << "[0:a]";
+            << "-filter:a \"volume=1[0:a]";
             if (fade_in && !is_testmode)
                 stream << ";[0:a]afade=t=in:d=2[0:a]";
             if (fade_out && m_finished_level)
@@ -126,7 +129,7 @@ void MyRenderTexture::begin() {
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_old_fbo);
 }
 
-std::vector<u8> MyRenderTexture::capture() {
+void MyRenderTexture::capture(std::mutex& lock, std::vector<u8>& data, volatile bool& lul) {
     glViewport(0, 0, m_width, m_height);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &m_old_fbo);
@@ -135,16 +138,15 @@ std::vector<u8> MyRenderTexture::capture() {
     auto director = CCDirector::sharedDirector();
     auto scene = director->getRunningScene();
     scene->visit();
-    
-    // dynamic_array<u8> data(m_width * m_height * 3);
-    std::vector<u8> data;
-    data.resize(m_width * m_height * 3, 0);
+
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    lock.lock();
+    lul = true;
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+    lock.unlock();
 
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_old_fbo);
     director->setViewport();
-    return data;
 }
 
 void MyRenderTexture::end() {
@@ -152,10 +154,8 @@ void MyRenderTexture::end() {
 }
 
 void Recorder::capture_frame() {
-    const auto frame = m_renderer.capture();
-    m_lock.lock();
-    m_frames.push(frame);
-    m_lock.unlock();
+    while (m_frame_has_data) {}
+    m_renderer.capture(m_lock, m_current_frame, m_frame_has_data);
 }
 
 void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
