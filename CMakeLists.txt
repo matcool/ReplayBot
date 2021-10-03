@@ -3,6 +3,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(libraries/mat-dash/include.cmake)
+
 project(replay-bot)
 
 find_file(WINDOWS_HEADER windows.h)
