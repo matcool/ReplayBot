@@ -59,14 +59,9 @@ void __fastcall Hooks::CCScheduler_update_H(CCScheduler* self, int, float dt) {
         // todo: find ways to disable more render stuff
         g_disable_render = false;
 
-        // TODO: not have this min()
-        // doing the commented out if below causes really weird stutters for some reason
-        // const int times = min(static_cast<int>((dt + g_left_over) / target_dt), 150);
         unsigned times = static_cast<int>((dt + g_left_over) / target_dt);
-        // if the fps is really low then dont run it a lot of times
-        // if (dt > 1.f / 10.f) {
-        //     times = min(times, 100);
-        // }
+        if (dt == 0.f)
+            return CCScheduler_update(self, target_dt);
         auto start = std::chrono::high_resolution_clock::now();
         for (unsigned i = 0; i < times; ++i) {
             // if (i == times - 1)
