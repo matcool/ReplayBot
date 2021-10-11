@@ -35,10 +35,7 @@ target_include_directories(replay-bot PRIVATE
   libraries/cocos-headers/extensions/
 )
 
-# lmao
-option(BUILD_SHARED_LIBS "" ON)
 add_subdirectory(libraries/minhook)
-option(BUILD_SHARED_LIBS "" OFF)
 
 target_link_libraries(replay-bot
   minhook

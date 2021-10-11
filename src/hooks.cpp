@@ -13,11 +13,8 @@ auto cocos(const char* symbol) {
 void Hooks::init() {
     add_hook<&CCScheduler_update, Thiscall>(cocos("?update@CCScheduler@cocos2d@@UAEXM@Z"));
     add_hook<&CCKeyboardDispatcher_dispatchKeyboardMSG>(cocos("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z"));
-    add_hook<&CheckpointObject_create, Optfastcall>(gd::base + 0x20ddd0);
 
     add_hook<&PlayLayer::update, Thiscall>(gd::base + 0x2029C0);
-
-    add_hook<&PlayLayer::resetLevel>(gd::base + 0x20BF00);
 
     add_hook<&PlayLayer::pauseGame>(gd::base + 0x20D3C0);
 
@@ -85,7 +82,7 @@ void Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG(CCKeyboardDispatcher* self,
             } else if (key == 'F') {
                 rs.set_frame_advance(false);
             } else if (key == 'R') {
-                PlayLayer::resetLevel(play_layer);
+                play_layer->resetLevel();
             }
         }
     }
@@ -184,6 +181,8 @@ bool Hooks::PauseLayer_init(gd::PauseLayer* self) {
         // stop it breaking when loading from extensions
         add_hook<&PlayLayer::pushButton>(gd::base + 0x111500);
         add_hook<&PlayLayer::releaseButton>(gd::base + 0x111660);
+        add_hook<&PlayLayer::resetLevel>(gd::base + 0x20BF00);
+        add_hook<&CheckpointObject_create, Optfastcall>(gd::base + 0x20ddd0);
     }
     if (orig<&PauseLayer_init>(self)) {
         auto win_size = CCDirector::sharedDirector()->getWinSize();
