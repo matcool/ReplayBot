@@ -17,8 +17,6 @@ void Hooks::init() {
 
     add_hook<&PlayLayer::update, Thiscall>(gd::base + 0x2029C0);
 
-    add_hook<&PlayLayer::pushButton>(gd::base + 0x111500);
-    add_hook<&PlayLayer::releaseButton>(gd::base + 0x111660);
     add_hook<&PlayLayer::resetLevel>(gd::base + 0x20BF00);
 
     add_hook<&PlayLayer::pauseGame>(gd::base + 0x20D3C0);
@@ -179,6 +177,14 @@ void Hooks::PauseLayer_onEditor(gd::PauseLayer* self, CCObject* idk) {
 }
 
 bool Hooks::PauseLayer_init(gd::PauseLayer* self) {
+    static bool placed_hooks = false;
+    if (!placed_hooks) {
+        placed_hooks = true;
+        // this is stupid lol, but should hopefully
+        // stop it breaking when loading from extensions
+        add_hook<&PlayLayer::pushButton>(gd::base + 0x111500);
+        add_hook<&PlayLayer::releaseButton>(gd::base + 0x111660);
+    }
     if (orig<&PauseLayer_init>(self)) {
         auto win_size = CCDirector::sharedDirector()->getWinSize();
         
