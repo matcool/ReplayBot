@@ -7,17 +7,11 @@ include(libraries/mat-dash/include.cmake)
 
 project(replay-bot)
 
-find_file(WINDOWS_HEADER windows.h)
-if(NOT WINDOWS_HEADER)
-  message(FATAL_ERROR "Can't find windows.h!")
-endif()
-
-# TODO: not
-add_compile_definitions(FTG_IGNORE_UNICODE)
-
 if (${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
   add_compile_definitions(SHOW_CONSOLE)
 endif()
+
+add_compile_definitions(UNICODE _UNICODE)
 
 file(
   GLOB_RECURSE SOURCE_FILES

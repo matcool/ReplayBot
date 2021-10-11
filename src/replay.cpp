@@ -49,7 +49,7 @@ constexpr const char* format_magic = "RPLY";
 
 void Replay::save(const std::string& path) {
 	std::ofstream file;
-	file.open(path, std::ios::binary | std::ios::out);
+	file.open(widen(path), std::ios::binary | std::ios::out);
 	file << format_magic << format_ver << type;
 	bin_write(file, fps);
 	for (const auto& action : actions) {
@@ -66,7 +66,7 @@ void Replay::save(const std::string& path) {
 Replay Replay::load(const std::string& path)  {
 	Replay replay(0, ReplayType::XPOS);
 	std::ifstream file;
-	file.open(path, std::ios::binary | std::ios::in);
+	file.open(widen(path), std::ios::binary | std::ios::in);
 
 	file.seekg(0, std::ios::end);
 	size_t file_size = static_cast<size_t>(file.tellg());

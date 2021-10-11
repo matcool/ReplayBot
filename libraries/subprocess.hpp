@@ -54,7 +54,7 @@ namespace subprocess {
             sec_attrs.lpSecurityDescriptor = nullptr;
 
             m_proc_info = {0};
-            STARTUPINFOA start_info = {0};
+            STARTUPINFOW start_info = {0};
 
             start_info.cb = sizeof(start_info);
             start_info.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -65,7 +65,14 @@ namespace subprocess {
             start_info.hStdInput = m_stdin.m_read.handle;
             m_stdin.m_write.set_inherit(false);
 
-            CreateProcessA(nullptr, const_cast<char*>(command.c_str()), nullptr, nullptr, true, 0, nullptr, nullptr, &start_info, &m_proc_info);
+            // cant include "utils.hpp" here, so just copy paste code from myself :D
+            auto size = MultiByteToWideChar(CP_UTF8, 0, command.c_str(), -1, nullptr, 0);
+            auto buffer = new wchar_t[size];
+            MultiByteToWideChar(CP_UTF8, 0, command.c_str(), -1, buffer, size);
+
+            CreateProcessW(nullptr, buffer, nullptr, nullptr, true, 0, nullptr, nullptr, &start_info, &m_proc_info);
+
+            delete[] buffer;
 
             m_stdin.m_read.close();
         }

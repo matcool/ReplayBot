@@ -25,3 +25,8 @@ template <typename R, typename U>
 R& from_offset(U base, int offset) {
     return *cast<R*>(cast<intptr_t>(base) + offset);
 }
+
+std::string narrow(const wchar_t* str);
+inline auto narrow(const std::wstring& str) { return narrow(str.c_str()); }
+std::wstring widen(const char* str);
+inline auto widen(const std::string& str) { return widen(str.c_str()); }

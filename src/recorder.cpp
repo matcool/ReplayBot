@@ -66,12 +66,12 @@ void Recorder::start(const std::string& path) {
         }
         std::cout << "video should be done now" << std::endl;
         if (!m_include_audio || !std::filesystem::exists(song_file)) return;
-        char buffer[MAX_PATH];
-        if (!GetTempFileNameA(std::filesystem::temp_directory_path().string().c_str(), "rec", 0, buffer)) {
+        wchar_t buffer[MAX_PATH];
+        if (!GetTempFileNameW(widen(std::filesystem::temp_directory_path().string()).c_str(), L"rec", 0, buffer)) {
             std::cout << "error getting temp file" << std::endl;
             return;
         }
-        auto temp_path = std::string(buffer) + "." + std::filesystem::path(path).filename().string();
+        auto temp_path = narrow(buffer) + "." + std::filesystem::path(path).filename().string();
         std::filesystem::rename(buffer, temp_path);
         auto total_time = m_last_frame_t; // 1 frame too short?
         {
@@ -92,8 +92,8 @@ void Recorder::start(const std::string& path) {
                 return;
             }
         }
-        std::filesystem::remove(path);
-        std::filesystem::rename(temp_path, path);
+        std::filesystem::remove(widen(path));
+        std::filesystem::rename(temp_path, widen(path));
         std::cout << "video + audio should be done now!" << std::endl;
     }).detach();
 }
