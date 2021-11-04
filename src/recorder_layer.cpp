@@ -112,7 +112,7 @@ bool RecorderLayer::init() {
 
     layer->addChild(NodeFactory<CCNode>::start().setPosition(top_left));
 
-    const std::string broad_filter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;-_=+@!\":0123456789$[](){} ";
+    const std::string broad_filter = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.,;-_=+@!'\":0123456789$[](){} ";
 
     auto text_input = TextInputNode::create(CCSize(60.f, 30.f), 1.f, "chatFont.fnt");
     text_input->setPosition(top_left + ccp(291.5f, -177.f));
@@ -147,6 +147,13 @@ bool RecorderLayer::init() {
 
     layer->addChild(NodeFactory<CCLabelBMFont>::start("Bitrate", "bigFont.fnt").setPosition(top_left + ccp(291.5f, -152.f)).setScale(0.4f));
     layer->addChild(NodeFactory<CCLabelBMFont>::start("Codec", "bigFont.fnt").setPosition(top_left + ccp(359.5f, -152.f)).setScale(0.4f));
+
+    text_input = TextInputNode::create(CCSize(128.f, 30.f), 1.f, "chatFont.fnt");
+    text_input->setPosition(top_left + ccp(124.5f, -217.f));
+    text_input->input_node->m_sCaption = "Audio extra options";
+    text_input->input_node->setAllowedChars(broad_filter);
+    text_input->input_node->setLabelPlaceholderColor({200, 200, 200});
+    layer->addChild(text_input);
 
     auto close_btn = gd::CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png"),

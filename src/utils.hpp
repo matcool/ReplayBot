@@ -1,6 +1,7 @@
 #pragma once
 #include "includes.h"
 #include <vector>
+#include <matdash.hpp>
 
 template <typename T, typename R>
 T cast(R const v) { return reinterpret_cast<T>(v); }
@@ -30,3 +31,19 @@ std::string narrow(const wchar_t* str);
 inline auto narrow(const std::wstring& str) { return narrow(str.c_str()); }
 std::wstring widen(const char* str);
 inline auto widen(const std::string& str) { return widen(str.c_str()); }
+
+template <typename T, typename U>
+T union_cast(U value) {
+    static_assert(sizeof(T) == sizeof(U), "union_cast sizes must mach");
+    union {
+        T a;
+        U b;
+    } u = {value};
+    return u.a;
+}
+
+template <typename T>
+using __to_handler_f_type = typename RemoveThiscall<typename MemberToFn<T>::type>::type;
+
+template <typename H, __to_handler_f_type<H> Func>
+static const auto to_handler = union_cast<H>(thiscall<decltype(Func)>::wrap<Func>);

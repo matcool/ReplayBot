@@ -46,22 +46,13 @@ public:
 
     void update_frame_offset();
 
-    void toggle_playing() {
-        state = is_playing() ? NOTHING : PLAYING;
-        update_frame_offset();
-        _update_status_label();
-    }
-    void toggle_recording() {
-        state = is_recording() ? NOTHING : RECORDING;
-        if (!is_recording()) frame_advance = false;
-        else replay = Replay(default_fps, default_type);
-        update_frame_offset();
-        _update_status_label();
-    }
+    void toggle_playing();
+    void toggle_recording();
 
     void reset_state() {
         state = NOTHING;
         frame_advance = false;
+        should_restart_next_time = false;
         update_frame_offset();
         _update_status_label();
     } 
@@ -83,4 +74,5 @@ public:
     bool real_time_mode = true; // fuck it we going public
     bool showcase_mode = false;
     Recorder recorder;
+    bool should_restart_next_time = false; // this is a great name i know
 };

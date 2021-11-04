@@ -26,21 +26,14 @@ target_include_directories(replay-bot PRIVATE
   libraries/gd.h
   libraries/minhook/include
   libraries/nfd/src/include
-  libraries/cocos-headers/cocos2dx/
-  libraries/cocos-headers/cocos2dx/include
-  libraries/cocos-headers/cocos2dx/kazmath/include
-  libraries/cocos-headers/cocos2dx/platform/win32
-  libraries/cocos-headers/cocos2dx/platform/third_party/win32
-  libraries/cocos-headers/cocos2dx/platform/third_party/win32/OGLES
-  libraries/cocos-headers/extensions/
 )
 
 add_subdirectory(libraries/minhook)
+add_subdirectory(libraries/cocos-headers)
 
 target_link_libraries(replay-bot
   minhook
-  ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/cocos2dx/libcocos2d.lib
-  ${CMAKE_SOURCE_DIR}/libraries/cocos-headers/extensions/libExtensions.lib
+  cocos2d
   opengl32
   ${CMAKE_SOURCE_DIR}/libraries/glew32.lib
 )

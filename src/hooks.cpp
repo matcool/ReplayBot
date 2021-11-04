@@ -5,32 +5,6 @@
 #include <chrono>
 #include <matdash/minhook.hpp>
 
-auto cocos(const char* symbol) {
-    static auto mod = GetModuleHandleA("libcocos2d.dll");
-    return GetProcAddress(mod, symbol);
-}
-
-void Hooks::init() {
-    add_hook<&CCScheduler_update, Thiscall>(cocos("?update@CCScheduler@cocos2d@@UAEXM@Z"));
-    add_hook<&CCKeyboardDispatcher_dispatchKeyboardMSG>(cocos("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z"));
-
-    add_hook<&PlayLayer::update, Thiscall>(gd::base + 0x2029C0);
-
-    add_hook<&PlayLayer::pauseGame>(gd::base + 0x20D3C0);
-
-    add_hook<&PlayLayer::levelComplete>(gd::base + 0x1FD3D0);
-    add_hook<&PlayLayer::onQuit>(gd::base + 0x20D810);
-    add_hook<&PauseLayer_onEditor>(gd::base + 0x1E60E0);
-
-    add_hook<&PlayLayer::updateVisiblity>(gd::base + 0x205460);
-
-    add_hook<&PauseLayer_init>(gd::base + 0x1E4620);
-
-    add_hook<&PlayerObject_ringJump>(gd::base + 0x1f4ff0);
-    add_hook<&GameObject_activateObject>(gd::base + 0xef0e0);
-    add_hook<&GJBaseGameLayer_bumpPlayer>(gd::base + 0x10ed50);
-}
-
 // yes these are global, too lazy to store them in replaysystem or smth
 // not like theyre used anywhere else atm
 bool g_disable_render = false;
@@ -95,9 +69,8 @@ void Hooks::PlayLayer::update(gd::PlayLayer* self, float dt) {
     auto& rs = ReplaySystem::get_instance();
     if (rs.get_frame_advance()) return;
     if (rs.is_playing()) rs.handle_playing();
-    if (rs.recorder.m_recording) {
+    if (rs.recorder.m_recording)
         rs.recorder.handle_recording(self, dt);
-    }
     orig<&update, Thiscall>(self, dt);
 }
 
@@ -241,4 +214,40 @@ void Hooks::GJBaseGameLayer_bumpPlayer(gd::GJBaseGameLayer* self, gd::PlayerObje
 void Hooks::PlayLayer::updateVisiblity(gd::PlayLayer* self) {
     if (!g_disable_render)
         orig<&updateVisiblity>(self);
+}
+
+void PauseLayer_onResume(gd::PauseLayer* self, CCObject* sender) {
+    auto& rs = ReplaySystem::get_instance();
+    if (rs.should_restart_next_time) {
+        self->onRestart(nullptr);
+        rs.should_restart_next_time = false;
+    } else
+        orig<&PauseLayer_onResume>(self, sender);
+}
+
+auto cocos(const char* symbol) {
+    static auto mod = GetModuleHandleA("libcocos2d.dll");
+    return GetProcAddress(mod, symbol);
+}
+
+void Hooks::init() {
+    add_hook<&CCScheduler_update, Thiscall>(cocos("?update@CCScheduler@cocos2d@@UAEXM@Z"));
+    add_hook<&CCKeyboardDispatcher_dispatchKeyboardMSG>(cocos("?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z"));
+
+    add_hook<&PlayLayer::update, Thiscall>(gd::base + 0x2029C0);
+
+    add_hook<&PlayLayer::pauseGame>(gd::base + 0x20D3C0);
+
+    add_hook<&PlayLayer::levelComplete>(gd::base + 0x1FD3D0);
+    add_hook<&PlayLayer::onQuit>(gd::base + 0x20D810);
+    add_hook<&PauseLayer_onEditor>(gd::base + 0x1E60E0);
+
+    add_hook<&PlayLayer::updateVisiblity>(gd::base + 0x205460);
+
+    add_hook<&PauseLayer_init>(gd::base + 0x1E4620);
+    add_hook<&PauseLayer_onResume>(gd::base + 0x1e5fa0);
+
+    add_hook<&PlayerObject_ringJump>(gd::base + 0x1f4ff0);
+    add_hook<&GameObject_activateObject>(gd::base + 0xef0e0);
+    add_hook<&GJBaseGameLayer_bumpPlayer>(gd::base + 0x10ed50);
 }

@@ -38,6 +38,33 @@ void ReplaySystem::update_frame_offset() {
     frame_offset = practice_fixes.get_last_checkpoint().frame;
 }
 
+void ReplaySystem::toggle_playing() {
+    state = is_playing() ? NOTHING : PLAYING;
+    auto pl = gd::GameManager::sharedState()->getPlayLayer();
+    if (is_playing())  {
+        if (pl && get_frame() > 0)
+            should_restart_next_time = true;
+        action_index = 0;
+    } else
+        should_restart_next_time = false;
+    update_frame_offset();
+    _update_status_label();
+}
+
+void ReplaySystem::toggle_recording() {
+    state = is_recording() ? NOTHING : RECORDING;
+    if (!is_recording()) {
+        frame_advance = false;
+        should_restart_next_time = false;
+    } else {
+        replay = Replay(default_fps, default_type);
+        if (gd::GameManager::sharedState()->getPlayLayer() && get_frame() > 0)
+            should_restart_next_time = true;
+    }
+    update_frame_offset();
+    _update_status_label();
+}
+
 void ReplaySystem::on_reset() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (is_playing()) {
