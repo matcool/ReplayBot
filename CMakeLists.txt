@@ -21,6 +21,17 @@ file(
 )
 add_library(replay-bot SHARED ${SOURCE_FILES})
 
+# https://stackoverflow.com/a/63924044/9124836
+execute_process(
+  COMMAND git rev-parse --short HEAD
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  OUTPUT_VARIABLE COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+configure_file("${CMAKE_SOURCE_DIR}/src/version.hpp.in"
+               "${CMAKE_SOURCE_DIR}/src/version.hpp")
+
 target_include_directories(replay-bot PRIVATE
   libraries/gd.h/include
   libraries/gd.h

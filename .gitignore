@@ -6,3 +6,4 @@ Release/
 .vs/
 .vscode/
 injector.exe
+src/version.hpp

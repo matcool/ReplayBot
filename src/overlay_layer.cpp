@@ -4,6 +4,7 @@
 #include <sstream>
 #include "recorder_layer.hpp"
 #include "nodes.hpp"
+#include "version.hpp"
 
 bool OverlayLayer::init() {
     if (!initWithColor({ 0, 0, 0, 105 })) return false;
@@ -177,6 +178,13 @@ bool OverlayLayer::init() {
     m_replay_info->setPosition({20, win_size.height - 133});
     update_info_text();
     addChild(m_replay_info);
+    
+    addChild(NodeFactory<CCLabelBMFont>::start(REPLAYBOT_VERSION, "chatFont.fnt")
+        .setAnchorPoint(ccp(1, 0))
+        .setScale(0.6f)
+        .setPosition(ccp(win_size.width - 5, 5))
+        .setOpacity(100)
+    );
 
     setKeypadEnabled(true);
     setTouchEnabled(true);
