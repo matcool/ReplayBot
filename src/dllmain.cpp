@@ -1,6 +1,7 @@
 #include "includes.h"
 #include <fstream>
 #include <matdash.hpp>
+#include <matdash/boilerplate.hpp>
 
 #include "hooks.hpp"
 
@@ -13,8 +14,6 @@ void mod_main(HMODULE module) {
     std::cin.rdbuf(conin.rdbuf());
 #endif
 
-    DisableThreadLibraryCalls(module);
-
     Hooks::init();
 
 #ifdef SHOW_CONSOLE
@@ -26,5 +25,3 @@ void mod_main(HMODULE module) {
     FreeLibraryAndExitThread(cast<HMODULE>(module), 0);
 #endif
 }
-
-#include <matdash/boilerplate.hpp>

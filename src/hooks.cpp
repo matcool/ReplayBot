@@ -98,10 +98,7 @@ void Hooks::PlayLayer::resetLevel(gd::PlayLayer* self) {
     orig<&resetLevel>(self);
     auto& rs = ReplaySystem::get_instance();
     rs.on_reset();
-    // from what i've checked rob doesnt store this anywhere, so i have to calculate it again
-    if (rs.recorder.m_recording)
-        rs.recorder.m_song_start_offset = self->timeForXPos2(
-            self->m_player1->m_position.x, self->m_isTestMode) + self->m_levelSettings->m_songStartOffset;
+    ReplaySystem::get_instance().recorder.update_song_offset(self);
 }
 
 
@@ -223,6 +220,14 @@ void PauseLayer_onResume(gd::PauseLayer* self, CCObject* sender) {
         rs.should_restart_next_time = false;
     } else
         orig<&PauseLayer_onResume>(self, sender);
+}
+
+bool PlayLayer_init(gd::PlayLayer* self, gd::GJGameLevel* level) {
+    if (!orig<&PlayLayer_init>(self, level)) return false;
+
+    ReplaySystem::get_instance().recorder.update_song_offset(self);
+
+    return true;
 }
 
 auto cocos(const char* symbol) {

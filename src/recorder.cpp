@@ -35,7 +35,8 @@ void Recorder::start(const std::string& path) {
     if (play_layer->m_level->songID == 0)
         song_file = CCFileUtils::sharedFileUtils()->fullPathForFilename(song_file.c_str(), false);
     auto is_testmode = play_layer->m_isTestMode;
-    std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume, is_testmode]() {
+    auto song_offset = m_song_start_offset;
+    std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume, is_testmode, song_offset]() {
         std::stringstream stream;
         stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
         << " -i - "; 
@@ -76,9 +77,11 @@ void Recorder::start(const std::string& path) {
         auto total_time = m_last_frame_t; // 1 frame too short?
         {
             std::stringstream stream;
-            stream << "ffmpeg -y -ss " << m_song_start_offset << " -i \"" << song_file
-            << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy "
-            << "-filter:a \"volume=1[0:a]";
+            stream << "ffmpeg -y -ss " << song_offset << " -i \"" << song_file
+            << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy ";
+            if (!m_extra_audio_args.empty())
+                stream << m_extra_audio_args << " ";
+            stream << "-filter:a \"volume=1[0:a]";
             if (fade_in && !is_testmode)
                 stream << ";[0:a]afade=t=in:d=2[0:a]";
             if (fade_out && m_finished_level)
@@ -176,4 +179,11 @@ void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
     } else {
         stop();
     }
+}
+
+void Recorder::update_song_offset(gd::PlayLayer* play_layer) {
+    // from what i've checked rob doesnt store this anywhere, so i have to calculate it again
+    if (m_recording)
+        m_song_start_offset = play_layer->timeForXPos2(
+            play_layer->m_player1->m_position.x, play_layer->m_isTestMode) + play_layer->m_levelSettings->m_songStartOffset;
 }
