@@ -153,6 +153,7 @@ bool RecorderLayer::init() {
     text_input->input_node->m_sCaption = "Audio extra options";
     text_input->input_node->setAllowedChars(broad_filter);
     text_input->input_node->setLabelPlaceholderColor({200, 200, 200});
+    text_input->set_value(rs.recorder.m_extra_audio_args);
     text_input->callback = [&rs](auto input) {
         rs.recorder.m_extra_audio_args = input->get_value();
     };
