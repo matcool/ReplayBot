@@ -32,7 +32,7 @@ bool RecorderLayer::init() {
 
     const auto center = win_size / 2.f;
 
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
 
     auto toggler = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(RecorderLayer::on_toggle_recorder));
     toggler->setPosition(top_left + ccp(30.f, -30.f));
@@ -185,7 +185,7 @@ void RecorderLayer::on_close(CCObject*) {
 }
 
 void RecorderLayer::on_toggle_recorder(CCObject* obj) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     auto toggler = static_cast<gd::CCMenuItemToggler*>(obj);
     if (toggler->isOn()) {
         rs.recorder.stop();
@@ -206,9 +206,9 @@ void RecorderLayer::on_toggle_recorder(CCObject* obj) {
 }
 
 void RecorderLayer::on_toggle_until_end(CCObject* obj) {
-    ReplaySystem::get_instance().recorder.m_until_end = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
+    ReplaySystem::get().recorder.m_until_end = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
 }
 
 void RecorderLayer::on_toggle_include_audio(CCObject* obj) {
-    ReplaySystem::get_instance().recorder.m_include_audio = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
+    ReplaySystem::get().recorder.m_include_audio = !static_cast<gd::CCMenuItemToggler*>(obj)->isOn();
 }

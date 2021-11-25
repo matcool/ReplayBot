@@ -11,7 +11,7 @@ bool g_disable_render = false;
 float g_left_over = 0.f;
 
 void Hooks::CCScheduler_update(CCScheduler* self, float dt) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (rs.recorder.m_recording || rs.is_playing() || rs.is_recording() && gd::GameManager::sharedState()->getPlayLayer()) {
         const auto fps = rs.get_replay().get_fps();
         auto speedhack = self->getTimeScale();
@@ -45,7 +45,7 @@ void Hooks::CCScheduler_update(CCScheduler* self, float dt) {
 }
 
 void Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG(CCKeyboardDispatcher* self, int key, bool down) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (down) {
         auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
         if (rs.is_recording() && play_layer) {
@@ -66,7 +66,7 @@ void Hooks::CCKeyboardDispatcher_dispatchKeyboardMSG(CCKeyboardDispatcher* self,
 float g_xpos_time = 0.f;
 
 void Hooks::PlayLayer::update(gd::PlayLayer* self, float dt) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (rs.get_frame_advance()) return;
     if (rs.is_playing()) rs.handle_playing();
     if (rs.recorder.m_recording)
@@ -77,7 +77,7 @@ void Hooks::PlayLayer::update(gd::PlayLayer* self, float dt) {
 
 bool _player_button_handler(bool hold, bool button) {
     if (gd::GameManager::sharedState()->getPlayLayer()) {
-        auto& rs = ReplaySystem::get_instance();
+        auto& rs = ReplaySystem::get();
         if (rs.is_playing()) return true;
         rs.record_action(hold, button);
     }
@@ -96,15 +96,15 @@ void Hooks::PlayLayer::releaseButton(gd::PlayLayer* self, int idk, bool button) 
 
 void Hooks::PlayLayer::resetLevel(gd::PlayLayer* self) {
     orig<&resetLevel>(self);
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     rs.on_reset();
-    ReplaySystem::get_instance().recorder.update_song_offset(self);
+    ReplaySystem::get().recorder.update_song_offset(self);
 }
 
 
 void Hooks::PlayLayer::pauseGame(gd::PlayLayer* self, bool idk) {
     auto addr = cast<void*>(gd::base + 0x20D43C);
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (rs.is_recording())
         rs.record_action(false, true, false);
 
@@ -124,12 +124,12 @@ CCObject* Hooks::CheckpointObject_create() {
 }
 
 void Hooks::PlayLayer::levelComplete(gd::PlayLayer* self) {
-    ReplaySystem::get_instance().reset_state();
+    ReplaySystem::get().reset_state();
     return orig<&levelComplete>(self);
 }
 
 void _on_exit_level() {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     rs.reset_state();
 }
 
@@ -178,7 +178,7 @@ bool Hooks::PauseLayer_init(gd::PauseLayer* self) {
 
 void _handle_activated_object(bool a, bool b, gd::GameObject* object) {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (play_layer && play_layer->m_isPracticeMode && rs.is_recording()) {
         if (object->m_hasBeenActivated && !a)
             rs.get_practice_fixes().add_activated_object(object);
@@ -214,7 +214,7 @@ void Hooks::PlayLayer::updateVisiblity(gd::PlayLayer* self) {
 }
 
 void PauseLayer_onResume(gd::PauseLayer* self, CCObject* sender) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (rs.should_restart_next_time) {
         self->onRestart(nullptr);
         rs.should_restart_next_time = false;
@@ -225,7 +225,7 @@ void PauseLayer_onResume(gd::PauseLayer* self, CCObject* sender) {
 bool PlayLayer_init(gd::PlayLayer* self, gd::GJGameLevel* level) {
     if (!orig<&PlayLayer_init>(self, level)) return false;
 
-    ReplaySystem::get_instance().recorder.update_song_offset(self);
+    ReplaySystem::get().recorder.update_song_offset(self);
 
     return true;
 }

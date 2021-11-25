@@ -12,7 +12,7 @@ bool OverlayLayer::init() {
     setZOrder(20);
 
     auto win_size = CCDirector::sharedDirector()->getWinSize();
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
         
     auto menu = CCMenu::create();
     menu->setPosition({0, win_size.height});
@@ -193,7 +193,7 @@ bool OverlayLayer::init() {
 }
 
 void OverlayLayer::update_info_text() {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     auto& replay = rs.get_replay();
     std::stringstream stream;
     stream << "Current Replay:\nFPS: " << replay.get_fps();
@@ -205,12 +205,12 @@ void OverlayLayer::update_info_text() {
 void OverlayLayer::_update_default_fps() {
     auto text = m_fps_input->getString();
     if (text[0])
-        ReplaySystem::get_instance().set_default_fps(std::stof(text));
+        ReplaySystem::get().set_default_fps(std::stof(text));
 }
 
 void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
     if (!btn2) {
-        auto& rs = ReplaySystem::get_instance();
+        auto& rs = ReplaySystem::get();
         int tag = alert->getTag();
         if (tag == 1) {
             rs.toggle_recording();
@@ -224,7 +224,7 @@ void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
 
 void OverlayLayer::on_record(CCObject*) {
     _update_default_fps();
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (!rs.is_recording()) {
         if (rs.get_replay().get_actions().empty()) {
             rs.toggle_recording();
@@ -244,14 +244,14 @@ void OverlayLayer::on_record(CCObject*) {
 }
 
 void OverlayLayer::on_play(CCObject*) {
-    ReplaySystem::get_instance().toggle_playing();
+    ReplaySystem::get().toggle_playing();
 }
 
 void OverlayLayer::on_save(CCObject*) {
     nfdchar_t* path = nullptr;
     auto result = NFD_SaveDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
-        ReplaySystem::get_instance().get_replay().save(path);
+        ReplaySystem::get().get_replay().save(path);
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay saved.")->show();
         free(path);
     }
@@ -261,7 +261,7 @@ void OverlayLayer::_handle_load_replay() {
     nfdchar_t* path = nullptr;
     auto result = NFD_OpenDialog("replay", nullptr, &path);
     if (result == NFD_OKAY) {
-        ReplaySystem::get_instance().get_replay() = Replay::load(path);
+        ReplaySystem::get().get_replay() = Replay::load(path);
         update_info_text();
         gd::FLAlertLayer::create(nullptr, "Info", "Ok", nullptr, "Replay loaded.")->show();
         free(path);
@@ -269,7 +269,7 @@ void OverlayLayer::_handle_load_replay() {
 }
 
 void OverlayLayer::on_load(CCObject*) {
-    auto& rs = ReplaySystem::get_instance();
+    auto& rs = ReplaySystem::get();
     if (rs.get_replay().get_actions().empty()) {
         _handle_load_replay();
     } else {
@@ -291,26 +291,26 @@ void OverlayLayer::keyBackClicked() {
 void OverlayLayer::on_x_pos(CCObject*) {
     m_x_pos_toggle->toggle(false);
     m_frame_toggle->toggle(false);
-    ReplaySystem::get_instance().set_default_type(ReplayType::XPOS);
+    ReplaySystem::get().set_default_type(ReplayType::XPOS);
 }
 
 void OverlayLayer::on_frame(CCObject*) {
     m_x_pos_toggle->toggle(false);
     m_frame_toggle->toggle(false);
-    ReplaySystem::get_instance().set_default_type(ReplayType::FRAME);
+    ReplaySystem::get().set_default_type(ReplayType::FRAME);
 }
 
 void OverlayLayer::on_toggle_real_time(CCObject* toggle_) {
     auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
     if (toggle != nullptr) {
-        ReplaySystem::get_instance().real_time_mode = !toggle->isOn(); // why is it flipped
+        ReplaySystem::get().real_time_mode = !toggle->isOn(); // why is it flipped
     }
 }
 
 void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
     auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
     if (toggle != nullptr) {
-        ReplaySystem::get_instance().showcase_mode = !toggle->isOn();
+        ReplaySystem::get().showcase_mode = !toggle->isOn();
     }
 }
 

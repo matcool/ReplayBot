@@ -29,7 +29,7 @@ class ReplaySystem {
 
     unsigned frame_offset = 0;
 public:
-    static auto& get_instance() {
+    static auto& get() {
         static ReplaySystem instance;
         return instance;
     }
