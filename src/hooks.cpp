@@ -255,4 +255,6 @@ void Hooks::init() {
     add_hook<&PlayerObject_ringJump>(gd::base + 0x1f4ff0);
     add_hook<&GameObject_activateObject>(gd::base + 0xef0e0);
     add_hook<&GJBaseGameLayer_bumpPlayer>(gd::base + 0x10ed50);
+
+    add_hook<&PlayLayer_init>(gd::base + 0x1FB780);
 }

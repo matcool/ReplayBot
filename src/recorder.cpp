@@ -182,8 +182,7 @@ void Recorder::handle_recording(gd::PlayLayer* play_layer, float dt) {
 }
 
 void Recorder::update_song_offset(gd::PlayLayer* play_layer) {
-    // from what i've checked rob doesnt store this anywhere, so i have to calculate it again
-    if (m_recording)
-        m_song_start_offset = play_layer->timeForXPos2(
-            play_layer->m_player1->m_position.x, play_layer->m_isTestMode) + play_layer->m_levelSettings->m_songStartOffset;
+    // from what i've checked rob doesnt store the timeforxpos result anywhere, so i have to calculate it again
+    m_song_start_offset = play_layer->m_levelSettings->m_songStartOffset + play_layer->timeForXPos2(
+        play_layer->m_player1->m_position.x, play_layer->m_isTestMode);
 }
