@@ -22,6 +22,6 @@ void mod_main(HMODULE module) {
     conout.close();
     conin.close();
     FreeConsole();
-    FreeLibraryAndExitThread(cast<HMODULE>(module), 0);
+    FreeLibraryAndExitThread(module, 0);
 #endif
 }

@@ -98,7 +98,7 @@ void Hooks::PlayLayer::resetLevel(gd::PlayLayer* self) {
     orig<&resetLevel>(self);
     auto& rs = ReplaySystem::get();
     rs.on_reset();
-    ReplaySystem::get().recorder.update_song_offset(self);
+    rs.recorder.update_song_offset(self);
 }
 
 
@@ -129,8 +129,7 @@ void Hooks::PlayLayer::levelComplete(gd::PlayLayer* self) {
 }
 
 void _on_exit_level() {
-    auto& rs = ReplaySystem::get();
-    rs.reset_state();
+    ReplaySystem::get().reset_state();
 }
 
 void Hooks::PlayLayer::onQuit(gd::PlayLayer* self) {

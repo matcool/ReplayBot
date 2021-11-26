@@ -34,6 +34,9 @@ public:
         return instance;
     }
 
+    // prevent myself from accidentally copying it
+    ReplaySystem(const ReplaySystem&) = delete;
+
     inline auto& get_replay() { return replay; }
     inline auto get_default_fps() { return default_fps; }
     inline void set_default_fps(float fps) { default_fps = fps; }
