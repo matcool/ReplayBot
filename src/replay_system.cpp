@@ -21,8 +21,8 @@ void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
 void ReplaySystem::play_action(const Action& action) {
     auto gm = gd::GameManager::sharedState();
     auto flip = gm->getGameVariable("0010");
-    if (action.hold) orig<&Hooks::PlayLayer::pushButton>(gm->getPlayLayer(), 0, !action.player2 ^ flip);
-    else orig<&Hooks::PlayLayer::releaseButton>(gm->getPlayLayer(), 0, !action.player2 ^ flip);
+    if (action.hold) orig<&Hooks::PlayLayer_pushButton>(gm->getPlayLayer(), 0, !action.player2 ^ flip);
+    else orig<&Hooks::PlayLayer_releaseButton>(gm->getPlayLayer(), 0, !action.player2 ^ flip);
 }
 
 unsigned ReplaySystem::get_frame() {
@@ -69,8 +69,8 @@ void ReplaySystem::on_reset() {
     auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
     if (is_playing()) {
         update_frame_offset();
-        orig<&Hooks::PlayLayer::releaseButton>(play_layer, 0, false);
-        orig<&Hooks::PlayLayer::releaseButton>(play_layer, 0, true);
+        orig<&Hooks::PlayLayer_releaseButton>(play_layer, 0, false);
+        orig<&Hooks::PlayLayer_releaseButton>(play_layer, 0, true);
         action_index = 0;
         practice_fixes.activated_objects.clear();
         practice_fixes.activated_objects_p2.clear();
@@ -107,13 +107,13 @@ void ReplaySystem::on_reset() {
             if ((holding && actions.empty()) || (!actions.empty() && actions.back().hold != holding)) {
                 record_action(holding, true, false);
                 if (holding) {
-                    orig<&Hooks::PlayLayer::releaseButton>(play_layer, 0, true);
-                    orig<&Hooks::PlayLayer::pushButton>(play_layer, 0, true);
+                    orig<&Hooks::PlayLayer_releaseButton>(play_layer, 0, true);
+                    orig<&Hooks::PlayLayer_pushButton>(play_layer, 0, true);
                     play_layer->m_player1->m_hasJustHeld = true;
                 }
             } else if (!actions.empty() && actions.back().hold && holding && has_checkpoints && checkpoint.player1.buffer_orb) {
-                orig<&Hooks::PlayLayer::releaseButton>(play_layer, 0, true);
-                orig<&Hooks::PlayLayer::pushButton>(play_layer, 0, true);
+                orig<&Hooks::PlayLayer_releaseButton>(play_layer, 0, true);
+                orig<&Hooks::PlayLayer_pushButton>(play_layer, 0, true);
             }
             if (play_layer->m_levelSettings->m_twoPlayerMode)
                 record_action(false, false, false);

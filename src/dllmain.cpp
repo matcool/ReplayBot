@@ -2,6 +2,7 @@
 #include <fstream>
 #include <matdash.hpp>
 #include <matdash/boilerplate.hpp>
+#include <matdash/minhook.hpp>
 
 #include "hooks.hpp"
 
