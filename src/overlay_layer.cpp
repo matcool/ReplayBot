@@ -324,8 +324,8 @@ void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
 void OverlayLayer::on_recorder(CCObject*) {
     static bool has_ffmpeg = false;
     if (!has_ffmpeg) {
-        char buffer[MAX_PATH];
-        GetModuleFileNameA(GetModuleHandleA(NULL), buffer, MAX_PATH);
+        wchar_t buffer[MAX_PATH];
+        GetModuleFileNameW(GetModuleHandleA(NULL), buffer, MAX_PATH);
         const auto path = std::filesystem::path(buffer).parent_path() / "ffmpeg.exe";
         if (std::filesystem::exists(path)) {
             has_ffmpeg = true;
