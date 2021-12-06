@@ -38,7 +38,7 @@ void Recorder::start(const std::string& path) {
     auto song_offset = m_song_start_offset;
     std::thread([&, path, song_file, fade_in, fade_out, bg_volume, sfx_volume, is_testmode, song_offset]() {
         std::stringstream stream;
-        stream << "ffmpeg -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
+        stream << '"' << m_ffmpeg_path << '"' << " -y -f rawvideo -pix_fmt rgb24 -s " << m_width << "x" << m_height << " -r " << m_fps
         << " -i - "; 
         if (!m_codec.empty())
             stream << "-c:v " << m_codec << " ";
@@ -77,7 +77,7 @@ void Recorder::start(const std::string& path) {
         auto total_time = m_last_frame_t; // 1 frame too short?
         {
             std::stringstream stream;
-            stream << "ffmpeg -y -ss " << song_offset << " -i \"" << song_file
+            stream << '"' << m_ffmpeg_path << '"' << " -y -ss " << song_offset << " -i \"" << song_file
             << "\" -i \"" << path << "\" -t " << total_time << " -c:v copy ";
             if (!m_extra_audio_args.empty())
                 stream << m_extra_audio_args << " ";

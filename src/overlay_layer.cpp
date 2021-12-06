@@ -5,6 +5,7 @@
 #include "recorder_layer.hpp"
 #include "nodes.hpp"
 #include "version.hpp"
+#include <filesystem>
 
 bool OverlayLayer::init() {
     if (!initWithColor({ 0, 0, 0, 105 })) return false;
@@ -209,16 +210,22 @@ void OverlayLayer::_update_default_fps() {
 }
 
 void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
-    if (!btn2) {
-        auto& rs = ReplaySystem::get();
-        int tag = alert->getTag();
-        if (tag == 1) {
-            rs.toggle_recording();
-            update_info_text();
-        } else if (tag == 2) {
-            _handle_load_replay();
+    if (alert->getTag() == 1) {
+        if (!btn2) {
+            CCApplication::sharedApplication()->openURL("https://www.gyan.dev/ffmpeg/builds/");
         }
-        update_info_text();
+    } else {
+        if (!btn2) {
+            auto& rs = ReplaySystem::get();
+            int tag = alert->getTag();
+            if (tag == 1) {
+                rs.toggle_recording();
+                update_info_text();
+            } else if (tag == 2) {
+                _handle_load_replay();
+            }
+            update_info_text();
+        }
     }
 }
 
@@ -317,14 +324,28 @@ void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
 void OverlayLayer::on_recorder(CCObject*) {
     static bool has_ffmpeg = false;
     if (!has_ffmpeg) {
-        // theres prob a way to do it by not spawning a process but im lazy and hate dealing with winapi
-        auto process = subprocess::Popen("where ffmpeg");
-        if (process.close())
-            gd::FLAlertLayer::create(nullptr, "Error", "Ok", nullptr, "ffmpeg was not found in your path, recorder will not work without it")->show();
-        else
+        char buffer[MAX_PATH];
+        GetModuleFileNameA(GetModuleHandleA(NULL), buffer, MAX_PATH);
+        const auto path = std::filesystem::path(buffer).parent_path() / "ffmpeg.exe";
+        if (std::filesystem::exists(path)) {
             has_ffmpeg = true;
-        if (!has_ffmpeg)
-            return;
+            ReplaySystem::get().recorder.m_ffmpeg_path = path.string();
+        } else {
+            // theres prob a way to do it by not spawning a process but im lazy and hate dealing with winapi
+            auto process = subprocess::Popen("where ffmpeg");
+            if (process.close()) {
+                auto popup = gd::FLAlertLayer::create(this, "Error",
+                    "Download", "Cancel",
+                    "ffmpeg was not found, recorder will not work without it. "
+                    "To install ffmpeg download it and place the ffmpeg.exe (found inside the bin folder in the zip) in the gd folder"
+                );
+                popup->setTag(1);
+                popup->show();
+            } else
+                has_ffmpeg = true;
+            if (!has_ffmpeg)
+                return;
+        }
     }
     RecorderLayer::create()->show();
 }
