@@ -210,7 +210,7 @@ void OverlayLayer::_update_default_fps() {
 }
 
 void OverlayLayer::FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2) {
-    if (alert->getTag() == 1) {
+    if (alert->getTag() == 44) {
         if (!btn2) {
             CCApplication::sharedApplication()->openURL("https://www.gyan.dev/ffmpeg/builds/");
         }
@@ -339,7 +339,7 @@ void OverlayLayer::on_recorder(CCObject*) {
                     "ffmpeg was not found, recorder will not work without it. "
                     "To install ffmpeg download it and place the ffmpeg.exe (found inside the bin folder in the zip) in the gd folder"
                 );
-                popup->setTag(1);
+                popup->setTag(44);
                 popup->show();
             } else
                 has_ffmpeg = true;
