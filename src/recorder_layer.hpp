@@ -1,6 +1,5 @@
 #pragma once
 #include "includes.h"
-#include <gd.h>
 
 class RecorderLayer : public gd::FLAlertLayer {
 public:

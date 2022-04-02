@@ -18,7 +18,8 @@ void mod_main(HMODULE module) {
     Hooks::init();
 
 #ifdef SHOW_CONSOLE
-    std::getline(std::cin, std::string());
+    std::string line;
+    std::getline(std::cin, line);
     MH_Uninitialize();
     conout.close();
     conin.close();

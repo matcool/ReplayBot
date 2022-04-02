@@ -30,8 +30,6 @@ bool RecorderLayer::init() {
     auto check_off_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
     auto check_on_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 
-    const auto center = win_size / 2.f;
-
     auto& rs = ReplaySystem::get();
 
     auto toggler = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(RecorderLayer::on_toggle_recorder));
@@ -99,7 +97,7 @@ bool RecorderLayer::init() {
     layer->addChild(input);
 
     input = NumberInputNode::create(CCSize(50.f, 30.f));
-    input->set_value(rs.recorder.m_after_end_duration);
+    input->set_value(static_cast<int>(rs.recorder.m_after_end_duration));
     input->setPosition(top_left + ccp(346.f, -65.f));
     input->input_node->setMaxLabelScale(0.73f);
     input->callback = [&rs](auto input) {
