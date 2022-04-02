@@ -21,12 +21,12 @@ namespace subprocess {
         PipeHandle m_write;
 
         static PipePair create(bool inheritable) {
-            SECURITY_ATTRIBUTES security = {0};
+            SECURITY_ATTRIBUTES security = {};
             security.nLength = sizeof(security);
             security.bInheritHandle = inheritable;
             HANDLE read, write;
             CreatePipe(&read, &write, &security, 0);
-            return {read, write};
+            return { { read }, { write } };
         }
 
         void write(const void* const data, size_t size) {
@@ -43,18 +43,11 @@ namespace subprocess {
     public:
         PipePair m_stdin;
         PipePair m_stdout;
-        PROCESS_INFORMATION m_proc_info;
+        PROCESS_INFORMATION m_proc_info{};
     public:
         Popen() {}
         Popen(const std::string& command) {
-            SECURITY_ATTRIBUTES sec_attrs = {0};
-
-            sec_attrs.nLength = sizeof(sec_attrs);
-            sec_attrs.bInheritHandle = true;
-            sec_attrs.lpSecurityDescriptor = nullptr;
-
-            m_proc_info = {0};
-            STARTUPINFOW start_info = {0};
+            STARTUPINFOW start_info = {};
 
             start_info.cb = sizeof(start_info);
             start_info.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -78,7 +71,7 @@ namespace subprocess {
         }
 
         int wait() {
-            DWORD result = WaitForSingleObject(m_proc_info.hProcess, INFINITE);
+            WaitForSingleObject(m_proc_info.hProcess, INFINITE);
             DWORD exit_code;
             GetExitCodeProcess(m_proc_info.hProcess, &exit_code);
             return exit_code;
