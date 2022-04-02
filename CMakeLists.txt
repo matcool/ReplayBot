@@ -39,6 +39,18 @@ target_include_directories(replay-bot PRIVATE
   libraries/nfd/src/include
 )
 
+# this is so stupid
+set(CMAKE_SIZEOF_VOID_P 4)
+
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
+  # ensure 32 bit on clang
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -target i386-pc-windows-msvc ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target i386-pc-windows-msvc ")
+else()
+  target_compile_options(replay-bot PRIVATE /permissive- /W4 /w14640)
+endif()
+
+
 add_subdirectory(libraries/minhook)
 add_subdirectory(libraries/cocos-headers)
 
