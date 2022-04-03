@@ -1,13 +1,10 @@
 #pragma once
 #include "includes.h"
+#include "nodes.hpp"
 
 class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate, public gd::FLAlertLayerProtocol {
-    gd::CCTextInputNode* m_fps_input;
     CCLabelBMFont* m_replay_info;
-    gd::CCMenuItemToggler* m_x_pos_toggle;
-    gd::CCMenuItemToggler* m_frame_toggle;
 
-    inline void _update_default_fps();
     void _handle_load_replay();
 public:
     static auto create() {
@@ -39,18 +36,35 @@ public:
     void on_save(CCObject*);
     void on_load(CCObject*);
 
-    void on_x_pos(CCObject*);
-    void on_frame(CCObject*);
-
     void on_toggle_real_time(CCObject*);
     void on_toggle_showcase(CCObject*);
 
     void on_recorder(CCObject*);
 
     virtual void keyBackClicked();
-    virtual void keyDown(enumKeyCodes key) {
-        // keyDown overwrites keyBackClicked, how fun
-        if (key == 27) keyBackClicked();
-    }
+    // virtual void keyDown(enumKeyCodes key) {
+    //     // keyDown overwrites keyBackClicked, how fun
+    //     if (key == 27) keyBackClicked();
+    // }
+    virtual void FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2);
+};
+
+class RecordOptionsLayer : public gd::FLAlertLayer, public gd::FLAlertLayerProtocol {
+public:
+    NumberInputNode* m_fps_input;
+    gd::CCMenuItemToggler* m_x_pos_toggle;
+    gd::CCMenuItemToggler* m_frame_toggle;
+    OverlayLayer* m_parent;
+
+    GEN_CREATE(RecordOptionsLayer)
+
+    bool init(OverlayLayer*);
+    void keyBackClicked();
+    void on_close(CCObject*);
+    void on_x_pos(CCObject*);
+    void on_frame(CCObject*);
+    void on_record(CCObject*);
+
+    void update_default_fps();
     virtual void FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2);
 };

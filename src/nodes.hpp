@@ -90,6 +90,7 @@ public:
     _gen_func(setOpacity)
     _gen_func(setZOrder)
     _gen_func(setAnchorPoint)
+    _gen_func(setColor)
 
     #undef _gen_func
 };
