@@ -76,7 +76,8 @@ public:
     template <typename... Args>
     static auto& start(Args... args) { return *reinterpret_cast<NodeFactory*>(T::create(args...)); }
     
-    operator T*() { return reinterpret_cast<T*>(this); }
+    T* finish() { return reinterpret_cast<T*>(this); }
+    operator T*() { return finish(); }
 
     #define _gen_func(name) template <typename... Args> \
     inline auto& name(Args... args) { \

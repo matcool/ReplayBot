@@ -31,7 +31,8 @@ bool OverlayLayer::init() {
 
     sprite = CCSprite::create("GJ_button_01.png");
     sprite->setScale(0.72f);
-    
+
+    // TODO: make these toggles    
     btn = gd::CCMenuItemSpriteExtra::create(sprite, this, menu_selector(OverlayLayer::on_record));
     btn->setPosition({35, -50});
     menu->addChild(btn);
@@ -79,25 +80,35 @@ bool OverlayLayer::init() {
     auto check_on_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 
     auto toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_real_time));
-    toggle->setPosition({win_size.width - 35, -190});
+    toggle->setPosition({win_size.width - 35, -120});
     toggle->toggle(rs.real_time_mode);
     menu->addChild(toggle);
 
     label = CCLabelBMFont::create("Real Time", "bigFont.fnt");
     label->setAnchorPoint({1, 0.5});
-    label->setScale(0.8f);
-    label->setPosition({win_size.width - 55, win_size.height - 190});
+    label->setScale(0.6f);
+    label->setPosition({win_size.width - 55, win_size.height - 120});
     addChild(label);
 
+    // TODO: add some info button to nodes.hpp
+    menu->addChild(
+        NodeFactory<gd::CCMenuItemSpriteExtra>::start(
+            NodeFactory<CCSprite>::start(CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png")).setScale(.525f).finish(),
+            this, menu_selector(OverlayLayer::on_info_real_time)
+        )
+        .setPosition(ccp(win_size.width - 11, -109))
+        .setZOrder(-1)
+    );
+
     toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_showcase));
-    toggle->setPosition({win_size.width - 35, -225});
-    toggle->toggle(rs.showcase_mode);
+    toggle->setPosition({win_size.width - 35, -155});
+    toggle->toggle(!rs.showcase_mode);
     menu->addChild(toggle);
 
-    label = CCLabelBMFont::create("Showcase Mode", "bigFont.fnt");
+    label = CCLabelBMFont::create("Status Text", "bigFont.fnt");
     label->setAnchorPoint({1, 0.5});
     label->setScale(0.6f);
-    label->setPosition({win_size.width - 55, win_size.height - 225});
+    label->setPosition({win_size.width - 55, win_size.height - 155});
     addChild(label);
 
     btn = gd::CCMenuItemSpriteExtra::create(CCSprite::create("GJ_button_01.png"), this, menu_selector(OverlayLayer::on_recorder));
@@ -114,18 +125,18 @@ bool OverlayLayer::init() {
         draw_node->setPosition(btn->getNormalImage()->getContentSize() / 2.f);
     }
     btn->getNormalImage()->setScale(0.775f);
-    btn->setPosition({win_size.width - 35, -260});
+    btn->setPosition({win_size.width - 35, -190});
     menu->addChild(btn);
 
     addChild(NodeFactory<CCLabelBMFont>::start("Internal Renderer", "bigFont.fnt")
         .setAnchorPoint(ccp(1, 0.5))
         .setScale(0.6f)
-        .setPosition(win_size - ccp(55, 260))
+        .setPosition(win_size - ccp(55, 190))
     );
 
     m_replay_info = CCLabelBMFont::create("", "chatFont.fnt");
     m_replay_info->setAnchorPoint({0, 1});
-    m_replay_info->setPosition({20, win_size.height - 133});
+    m_replay_info->setPosition({20, win_size.height - 103});
     update_info_text();
     addChild(m_replay_info);
     
@@ -225,7 +236,7 @@ void OverlayLayer::on_toggle_real_time(CCObject* toggle_) {
 void OverlayLayer::on_toggle_showcase(CCObject* toggle_) {
     auto toggle = cast<gd::CCMenuItemToggler*>(toggle_);
     if (toggle != nullptr) {
-        ReplaySystem::get().showcase_mode = !toggle->isOn();
+        ReplaySystem::get().showcase_mode = toggle->isOn();
     }
 }
 
@@ -256,6 +267,11 @@ void OverlayLayer::on_recorder(CCObject*) {
         }
     }
     RecorderLayer::create()->show();
+}
+
+void OverlayLayer::on_info_real_time(CCObject*) {
+    FLAlertLayer::create(nullptr, "Info", "OK", nullptr,
+        "Will try to run the game at full speed even if the fps doesn't match with the replay's fps.\nOnly in effect when recording or playing.")->show();
 }
 
 bool RecordOptionsLayer::init(OverlayLayer* parent) {
@@ -349,16 +365,17 @@ bool RecordOptionsLayer::init(OverlayLayer* parent) {
         .setPosition(ccp(125, -125))
     );
 
-    // menu->addChild(
-    //     NodeFactory<gd::CCMenuItemSpriteExtra>::start(
-    //         NodeFactory<CCSprite>::start(CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png")).setScale(.75f),
-    //         this, menu_selector(RecordOptionsLayer::on_close)
-    //     )
-    //     .setPosition(18.f, win_size.height - 18.f)
-    // );
+    menu->addChild(
+        NodeFactory<gd::CCMenuItemSpriteExtra>::start(
+            NodeFactory<CCSprite>::start(CCSprite::createWithSpriteFrameName("GJ_closeBtn_001.png")).setScale(.75f).finish(),
+            this, menu_selector(RecordOptionsLayer::on_close)
+        )
+        .setPosition(ccp(18.f, win_size.height - 18.f) - top_left)
+    );
 
     setKeypadEnabled(true);
     setTouchEnabled(true);
+    setKeyboardEnabled(true);
 
     return true;
 }

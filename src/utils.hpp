@@ -45,5 +45,13 @@ T union_cast(U value) {
 template <typename T>
 using __to_handler_f_type = typename RemoveThiscall<typename MemberToFn<T>::type>::type;
 
-template <typename H, __to_handler_f_type<H> Func>
-static const auto to_handler = union_cast<H>(thiscall<decltype(Func)>::wrap<Func>);
+// template <typename H, __to_handler_f_type<H> Func>
+// static const auto to_handler = union_cast<H>(thiscall<decltype(Func)>::wrap<Func>);
+
+template <class S>
+S& operator<<(S& stream, const CCPoint& point) {
+    stream << "CCPoint{" << point.x << ", " << point.y << "}";
+    return stream;
+}
+
+using u8 = unsigned char;

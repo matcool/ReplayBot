@@ -39,13 +39,15 @@ public:
     void on_toggle_real_time(CCObject*);
     void on_toggle_showcase(CCObject*);
 
+    void on_info_real_time(CCObject*);
+
     void on_recorder(CCObject*);
 
     virtual void keyBackClicked();
-    // virtual void keyDown(enumKeyCodes key) {
-    //     // keyDown overwrites keyBackClicked, how fun
-    //     if (key == 27) keyBackClicked();
-    // }
+    virtual void keyDown(enumKeyCodes key) {
+        // keyDown overwrites keyBackClicked, how fun
+        if (key == 27) keyBackClicked();
+    }
     virtual void FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2);
 };
 
@@ -59,12 +61,17 @@ public:
     GEN_CREATE(RecordOptionsLayer)
 
     bool init(OverlayLayer*);
-    void keyBackClicked();
     void on_close(CCObject*);
     void on_x_pos(CCObject*);
     void on_frame(CCObject*);
     void on_record(CCObject*);
 
     void update_default_fps();
+
+    virtual void keyBackClicked();
     virtual void FLAlert_Clicked(gd::FLAlertLayer* alert, bool btn2);
+    // TODO: pressing space in the layer just crashes???
+    virtual void keyDown(enumKeyCodes key) {
+        if (key == 27) keyBackClicked();
+    }
 };
