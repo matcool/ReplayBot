@@ -7,6 +7,9 @@ class OverlayLayer : public gd::FLAlertLayer, public CCTextFieldDelegate, public
 
     void _handle_load_replay();
 public:
+    gd::CCMenuItemToggler* m_record_toggle;
+    gd::CCMenuItemToggler* m_play_toggle;
+    
     static auto create() {
         auto node = new OverlayLayer;
         if (node && node->init()) {

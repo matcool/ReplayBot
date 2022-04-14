@@ -32,10 +32,13 @@ bool OverlayLayer::init() {
     sprite = CCSprite::create("GJ_button_01.png");
     sprite->setScale(0.72f);
 
-    // TODO: make these toggles    
-    btn = gd::CCMenuItemSpriteExtra::create(sprite, this, menu_selector(OverlayLayer::on_record));
-    btn->setPosition({35, -50});
-    menu->addChild(btn);
+    auto* const check_off_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+    auto* const check_on_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
+
+    m_record_toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_record));
+    m_record_toggle->setPosition({35, -50});
+    m_record_toggle->toggle(rs.is_recording());
+    menu->addChild(m_record_toggle);
 
     auto label = CCLabelBMFont::create("Record", "bigFont.fnt");
     label->setAnchorPoint({0, 0.5});
@@ -43,9 +46,10 @@ bool OverlayLayer::init() {
     label->setPosition({55, win_size.height - 50});
     addChild(label);
 
-    btn = gd::CCMenuItemSpriteExtra::create(sprite, this, menu_selector(OverlayLayer::on_play));
-    btn->setPosition({35, -85});
-    menu->addChild(btn);
+    m_play_toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_play));
+    m_play_toggle->setPosition({35, -85});
+    m_play_toggle->toggle(rs.is_playing());
+    menu->addChild(m_play_toggle);
 
     label = CCLabelBMFont::create("Play", "bigFont.fnt");
     label->setAnchorPoint({0, 0.5});
@@ -76,10 +80,7 @@ bool OverlayLayer::init() {
     label->setPosition({win_size.width - 55, win_size.height - 85});
     addChild(label);
 
-    auto check_off_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-    auto check_on_sprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-
-    auto toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_real_time));
+    auto* toggle = gd::CCMenuItemToggler::create(check_off_sprite, check_on_sprite, this, menu_selector(OverlayLayer::on_toggle_real_time));
     toggle->setPosition({win_size.width - 35, -120});
     toggle->toggle(rs.real_time_mode);
     menu->addChild(toggle);
@@ -178,12 +179,16 @@ void OverlayLayer::on_record(CCObject*) {
     auto& rs = ReplaySystem::get();
     if (rs.is_recording())
         rs.toggle_recording();
-    else
+    else {
+        m_record_toggle->toggle(true);
         RecordOptionsLayer::create(this)->show();
+    }
 }
 
 void OverlayLayer::on_play(CCObject*) {
-    ReplaySystem::get().toggle_playing();
+    auto& rs = ReplaySystem::get();
+    rs.toggle_playing();
+    m_record_toggle->toggle(false);
 }
 
 void OverlayLayer::on_save(CCObject*) {
@@ -271,7 +276,8 @@ void OverlayLayer::on_recorder(CCObject*) {
 
 void OverlayLayer::on_info_real_time(CCObject*) {
     FLAlertLayer::create(nullptr, "Info", "OK", nullptr,
-        "Will try to run the game at full speed even if the fps doesn't match with the replay's fps.\nOnly in effect when recording or playing.")->show();
+        "Will try to run the game at full speed even if the fps doesn't match with the replay's fps.\n"
+        "Only in effect when recording or playing.")->show();
 }
 
 bool RecordOptionsLayer::init(OverlayLayer* parent) {
@@ -291,7 +297,6 @@ bool RecordOptionsLayer::init(OverlayLayer* parent) {
     m_pLayer->addChild(bg);
 
     const CCPoint top_left = win_size / 2.f - ccp(window_size.width / 2.f, -window_size.height / 2.f);
-    std::cout << "top_left is " << top_left << std::endl;
 
     registerWithTouchDispatcher();
     CCDirector::sharedDirector()->getTouchDispatcher()->incrementForcePrio(2);
@@ -413,6 +418,8 @@ void RecordOptionsLayer::on_record(CCObject*) {
         if (rs.get_replay().get_actions().empty()) {
             rs.toggle_recording();
             m_parent->update_info_text();
+            m_parent->m_record_toggle->toggle(true);
+            m_parent->m_play_toggle->toggle(false);
             this->keyBackClicked();
         } else {
             auto alert = gd::FLAlertLayer::create(
@@ -425,6 +432,7 @@ void RecordOptionsLayer::on_record(CCObject*) {
             alert->show();
         }
     } else {
+        m_parent->m_record_toggle->toggle(false);
         rs.toggle_recording();
     }
 }
@@ -435,5 +443,7 @@ void RecordOptionsLayer::FLAlert_Clicked(gd::FLAlertLayer*, bool btn2) {
         rs.toggle_recording();
         m_parent->update_info_text();
         this->keyBackClicked();
+        m_parent->m_record_toggle->toggle(true);
+        m_parent->m_play_toggle->toggle(false);
     }
 }
