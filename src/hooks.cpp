@@ -16,7 +16,8 @@ void CCScheduler_update(CCScheduler* self, float dt) {
         const auto fps = rs.get_replay().get_fps();
         auto speedhack = self->getTimeScale();
 
-        dt *= rs.speed_hack;
+        if (rs.is_recording())
+            dt *= rs.speed_hack;
 
         const float target_dt = 1.f / fps / speedhack;
 
@@ -220,6 +221,12 @@ void PauseLayer_onResume(gd::PauseLayer* self, CCObject* sender) {
         orig<&PauseLayer_onResume>(self, sender);
 }
 
+void PauseLayer_onRestart(gd::PauseLayer* self, CCObject* sender) {
+    auto& rs = ReplaySystem::get();
+    rs.should_restart_next_time = false;
+    orig<&PauseLayer_onRestart>(self, sender);
+}
+
 bool PlayLayer_init(gd::PlayLayer* self, gd::GJGameLevel* level) {
     if (!orig<&PlayLayer_init>(self, level)) return false;
 
@@ -249,6 +256,7 @@ void Hooks::init() {
 
     add_hook<&PauseLayer_init>(gd::base + 0x1E4620);
     add_hook<&PauseLayer_onResume>(gd::base + 0x1e5fa0);
+    add_hook<&PauseLayer_onRestart>(gd::base + 0x1e6040);
 
     add_hook<&PlayerObject_ringJump>(gd::base + 0x1f4ff0);
     add_hook<&GameObject_activateObject>(gd::base + 0xef0e0);
