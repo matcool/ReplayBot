@@ -55,3 +55,8 @@ S& operator<<(S& stream, const CCPoint& point) {
 }
 
 using u8 = unsigned char;
+
+inline std::pair<std::string_view, std::string_view> split_once(const std::string_view str, char split) {
+	const auto n = str.find(split);
+	return { str.substr(0, n), str.substr(n + 1) };
+}

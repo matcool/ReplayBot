@@ -1,5 +1,7 @@
 #include "replay_system.hpp"
 #include "hooks.hpp"
+#include <filesystem>
+#include <fstream>
 
 void ReplaySystem::record_action(bool hold, bool player1, bool flip) {
     if (is_recording()) {
@@ -179,4 +181,73 @@ void ReplaySystem::_update_status_label() {
     } else if (recorder.m_recording) {
         recorder.stop();
     }
+}
+
+std::filesystem::path get_save_file_path() {
+    const auto path = CCFileUtils::sharedFileUtils()->getWritablePath();
+    return std::filesystem::path(path) / "replaybot.txt";
+}
+
+void ReplaySystem::save() {
+    const auto path = get_save_file_path();
+    std::ofstream file(path);
+    // incredible
+    file << "fps=" << default_fps << '\n';
+    file << "type=" << static_cast<int>(default_type) << '\n';
+    file << "real_time=" << real_time_mode << '\n';
+    file << "showcase_mode=" << showcase_mode << '\n';
+    file << "recorder_width=" << recorder.m_width << '\n';
+    file << "recorder_height=" << recorder.m_height << '\n';
+    file << "recorder_fps=" << recorder.m_fps << '\n';
+    file << "recorder_until_end=" << recorder.m_until_end << '\n';
+    file << "recorder_codec=" << recorder.m_codec << '\n';
+    file << "recorder_bitrate=" << recorder.m_bitrate << '\n';
+    file << "recorder_extra_args=" << recorder.m_extra_args << '\n';
+    file << "recorder_extra_audio_args=" << recorder.m_extra_audio_args << '\n';
+    file << "recorder_after_end_duration=" << recorder.m_after_end_duration << '\n';
+}
+
+void ReplaySystem::load() {
+    const auto path = get_save_file_path();
+    if (!std::filesystem::exists(path)) return;
+    std::ifstream file(path);
+    std::string line;
+    // incredible
+    try {
+        while (std::getline(file, line)) {
+            if (line.empty()) continue;
+            const auto [key, value] = split_once(line, '=');
+            using namespace std::literals::string_view_literals;
+            // incredible
+            if (key == "fps"sv)
+                default_fps = std::stof(std::string(value));
+            else if (key == "type"sv)
+                default_type = ReplayType(std::stoi(std::string(value)));
+            else if (key == "real_time"sv)
+                real_time_mode = value == "1"sv;
+            else if (key == "showcase_mode"sv)
+                showcase_mode = value == "1"sv;
+            else if (key == "recorder_width"sv)
+                recorder.m_width = std::stoul(std::string(value));
+            else if (key == "recorder_height"sv)
+                recorder.m_height = std::stoul(std::string(value));
+            else if (key == "recorder_fps"sv)
+                recorder.m_fps = std::stoul(std::string(value));
+            else if (key == "recorder_until_end"sv)
+                recorder.m_until_end = value == "1"sv;
+            else if (key == "recorder_codec"sv)
+                recorder.m_codec = value;
+            else if (key == "recorder_bitrate"sv)
+                recorder.m_bitrate = value;
+            else if (key == "recorder_extra_args"sv)
+                recorder.m_extra_args = value;
+            else if (key == "recorder_extra_audio_args"sv)
+                recorder.m_extra_audio_args = value;
+            else if (key == "recorder_after_end_duration"sv)
+                recorder.m_after_end_duration = std::stof(std::string(value));
+        }
+    } catch (...) {
+        // no care
+    }
+
 }

@@ -74,6 +74,9 @@ public:
 
     unsigned get_frame();
 
+    void save();
+    void load();
+
     bool real_time_mode = true; // fuck it we going public
     bool showcase_mode = false;
     Recorder recorder;

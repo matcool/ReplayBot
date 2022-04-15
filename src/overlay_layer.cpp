@@ -14,6 +14,12 @@ bool OverlayLayer::init() {
 
     auto win_size = CCDirector::sharedDirector()->getWinSize();
     auto& rs = ReplaySystem::get();
+
+    static bool has_loaded = false;
+    if (!has_loaded) {
+        has_loaded = true;
+        rs.load();
+    }
         
     auto menu = CCMenu::create();
     menu->setPosition({0, win_size.height});
@@ -143,7 +149,7 @@ bool OverlayLayer::init() {
 
     addChild(NodeFactory<CCLabelBMFont>::start("Speedhack", "bigFont.fnt")
         .setAnchorPoint(ccp(0, .5f))
-        .setPosition(ccp(20, win_size.height - 110))
+        .setPosition(ccp(20, win_size.height - 115))
         .setScale(0.6f)
     );
 
@@ -152,11 +158,10 @@ bool OverlayLayer::init() {
         input->set_value(rs.speed_hack);
         input->input_node->setMaxLabelScale(0.7f);
         input->input_node->setMaxLabelLength(10);
-        input->setPosition(ccp(162, win_size.height - 110));
+        input->setPosition(ccp(162, win_size.height - 115));
         input->callback = [&](auto& input) {
             const auto value = input.get_value();
             rs.speed_hack = value ? value.value() : 1.f;
-            std::cout << "value is now " << rs.speed_hack << std::endl;
         };
         addChild(input);
     }
@@ -248,6 +253,7 @@ void OverlayLayer::on_load(CCObject*) {
 }
 
 void OverlayLayer::keyBackClicked() {
+    ReplaySystem::get().save();
     gd::FLAlertLayer::keyBackClicked();
 }
 
