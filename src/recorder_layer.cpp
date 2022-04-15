@@ -65,8 +65,8 @@ bool RecorderLayer::init() {
     input->set_value(rs.recorder.m_width);
     input->setPosition(top_left + ccp(49.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
-    input->callback = [&rs](auto input) {
-        rs.recorder.m_width = input->get_value();
+    input->callback = [&rs](auto& input) {
+        rs.recorder.m_width = input.get_value();
     };
     layer->addChild(input);
 
@@ -78,8 +78,8 @@ bool RecorderLayer::init() {
     input->set_value(rs.recorder.m_height);
     input->setPosition(top_left + ccp(137.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
-    input->callback = [&rs](auto input) {
-        rs.recorder.m_height = input->get_value();
+    input->callback = [&rs](auto& input) {
+        rs.recorder.m_height = input.get_value();
     };
     layer->addChild(input);
 
@@ -91,8 +91,8 @@ bool RecorderLayer::init() {
     input->set_value(rs.recorder.m_fps);
     input->setPosition(top_left + ccp(225.f, -138.f));
     input->input_node->setMaxLabelScale(0.73f);
-    input->callback = [&rs](auto input) {
-        rs.recorder.m_fps = input->get_value();
+    input->callback = [&rs](auto& input) {
+        rs.recorder.m_fps = input.get_value();
     };
     layer->addChild(input);
 
@@ -100,8 +100,8 @@ bool RecorderLayer::init() {
     input->set_value(static_cast<int>(rs.recorder.m_after_end_duration));
     input->setPosition(top_left + ccp(346.f, -65.f));
     input->input_node->setMaxLabelScale(0.73f);
-    input->callback = [&rs](auto input) {
-        rs.recorder.m_after_end_duration = static_cast<float>(input->get_value());
+    input->callback = [&rs](auto& input) {
+        rs.recorder.m_after_end_duration = static_cast<float>(input.get_value());
     };
     layer->addChild(input);
     layer->addChild(NodeFactory<CCLabelBMFont>::start("seconds to render after", "bigFont.fnt")
@@ -116,8 +116,8 @@ bool RecorderLayer::init() {
     text_input->setPosition(top_left + ccp(291.5f, -177.f));
     text_input->input_node->setAllowedChars(broad_filter);
     text_input->set_value(rs.recorder.m_bitrate);
-    text_input->callback = [&rs](auto input) {
-        rs.recorder.m_bitrate = input->get_value();
+    text_input->callback = [&rs](auto& input) {
+        rs.recorder.m_bitrate = input.get_value();
     };
     layer->addChild(text_input);
 
@@ -127,8 +127,8 @@ bool RecorderLayer::init() {
     text_input->input_node->setAllowedChars(broad_filter);
     text_input->input_node->setLabelPlaceholderColor({200, 200, 200});
     text_input->set_value(rs.recorder.m_codec);
-    text_input->callback = [&rs](auto input) {
-        rs.recorder.m_codec = input->get_value();
+    text_input->callback = [&rs](auto& input) {
+        rs.recorder.m_codec = input.get_value();
     };
     layer->addChild(text_input);
 
@@ -137,8 +137,8 @@ bool RecorderLayer::init() {
     text_input->input_node->m_sCaption = "Extra options";
     text_input->input_node->setAllowedChars(broad_filter);
     text_input->set_value(rs.recorder.m_extra_args);
-    text_input->callback = [&rs](auto input) {
-        rs.recorder.m_extra_args = input->get_value();
+    text_input->callback = [&rs](auto& input) {
+        rs.recorder.m_extra_args = input.get_value();
     };
     text_input->input_node->setLabelPlaceholderColor({200, 200, 200});
     layer->addChild(text_input);
@@ -152,8 +152,8 @@ bool RecorderLayer::init() {
     text_input->input_node->setAllowedChars(broad_filter);
     text_input->input_node->setLabelPlaceholderColor({200, 200, 200});
     text_input->set_value(rs.recorder.m_extra_audio_args);
-    text_input->callback = [&rs](auto input) {
-        rs.recorder.m_extra_audio_args = input->get_value();
+    text_input->callback = [&rs](auto& input) {
+        rs.recorder.m_extra_audio_args = input.get_value();
     };
     layer->addChild(text_input);
 

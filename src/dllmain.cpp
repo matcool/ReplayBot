@@ -13,6 +13,7 @@ void mod_main(HMODULE module) {
     std::ifstream conin("CONIN$", std::ios::in);
     std::cout.rdbuf(conout.rdbuf());
     std::cin.rdbuf(conin.rdbuf());
+    std::cout << std::boolalpha;
 #endif
 
     Hooks::init();

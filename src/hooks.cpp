@@ -12,9 +12,11 @@ float g_left_over = 0.f;
 void CCScheduler_update(CCScheduler* self, float dt) {
     auto& rs = ReplaySystem::get();
     const auto play_layer = gd::GameManager::sharedState()->getPlayLayer();
-    if (play_layer && (rs.recorder.m_recording || rs.is_playing() || rs.is_recording())) {
+    if (play_layer && (rs.recorder.m_recording || rs.is_playing() || rs.is_recording()) && !play_layer->m_isPaused) {
         const auto fps = rs.get_replay().get_fps();
         auto speedhack = self->getTimeScale();
+
+        dt *= rs.speed_hack;
 
         const float target_dt = 1.f / fps / speedhack;
 

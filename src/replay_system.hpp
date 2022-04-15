@@ -78,4 +78,5 @@ public:
     bool showcase_mode = false;
     Recorder recorder;
     bool should_restart_next_time = false; // this is a great name i know
+    float speed_hack = 1.f;
 };

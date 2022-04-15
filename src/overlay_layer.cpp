@@ -137,15 +137,35 @@ bool OverlayLayer::init() {
 
     m_replay_info = CCLabelBMFont::create("", "chatFont.fnt");
     m_replay_info->setAnchorPoint({0, 1});
-    m_replay_info->setPosition({20, win_size.height - 103});
+    m_replay_info->setPosition({20, win_size.height - 130});
     update_info_text();
     addChild(m_replay_info);
+
+    addChild(NodeFactory<CCLabelBMFont>::start("Speedhack", "bigFont.fnt")
+        .setAnchorPoint(ccp(0, .5f))
+        .setPosition(ccp(20, win_size.height - 110))
+        .setScale(0.6f)
+    );
+
+    {
+        auto input = FloatInputNode::create(CCSize(64.f, 30.f));
+        input->set_value(rs.speed_hack);
+        input->input_node->setMaxLabelScale(0.7f);
+        input->input_node->setMaxLabelLength(10);
+        input->setPosition(ccp(162, win_size.height - 110));
+        input->callback = [&](auto& input) {
+            const auto value = input.get_value();
+            rs.speed_hack = value ? value.value() : 1.f;
+            std::cout << "value is now " << rs.speed_hack << std::endl;
+        };
+        addChild(input);
+    }
     
     addChild(NodeFactory<CCLabelBMFont>::start(REPLAYBOT_VERSION, "chatFont.fnt")
         .setAnchorPoint(ccp(1, 0))
         .setScale(0.6f)
         .setPosition(ccp(win_size.width - 5, 5))
-        .setOpacity(100)
+        .setOpacity(100u)
     );
 
     setKeypadEnabled(true);
