@@ -5,14 +5,19 @@
 namespace subprocess {
 
     struct PipeHandle {
-        HANDLE handle;
+        HANDLE handle = nullptr;
 
         void set_inherit(bool value) {
-            SetHandleInformation(handle, HANDLE_FLAG_INHERIT, value * HANDLE_FLAG_INHERIT);
+            if (handle) {
+                SetHandleInformation(handle, HANDLE_FLAG_INHERIT, value * HANDLE_FLAG_INHERIT);
+            }
         }
 
         void close() {
-            CloseHandle(handle);
+            if (handle) {
+                CloseHandle(handle);
+                handle = nullptr;
+            }
         }
     };
 
@@ -42,7 +47,6 @@ namespace subprocess {
     class Popen {
     public:
         PipePair m_stdin;
-        PipePair m_stdout;
         PROCESS_INFORMATION m_proc_info{};
     public:
         Popen() {}
@@ -80,7 +84,6 @@ namespace subprocess {
         int close(bool should_wait = true) {
             int exit_code = 0;
             m_stdin.close();
-            m_stdout.close();
             if (should_wait) exit_code = wait();
             CloseHandle(m_proc_info.hProcess);
             CloseHandle(m_proc_info.hThread);
