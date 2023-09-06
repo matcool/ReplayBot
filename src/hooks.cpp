@@ -4,6 +4,11 @@
 #include "recorder.hpp"
 #include <chrono>
 
+#include <windows.h> //For clicks
+#pragma comment(lib, "winmm.lib")
+
+bool clicks_on = true;
+
 // yes these are global, too lazy to store them in replaysystem or smth
 // not like theyre used anywhere else atm
 bool g_disable_render = false;
@@ -85,7 +90,15 @@ bool _player_button_handler(bool hold, bool button) {
 }
 
 void Hooks::PlayLayer_pushButton(gd::PlayLayer* self, int idk, bool button) {
-    if (_player_button_handler(true, button)) return;
+    if (_player_button_handler(true, button)) {
+
+        // Click Noise - By 1Codealot
+        if (clicks_on){
+            PlaySound("../click_noise.wav", NULL, SND_FILENAME);
+        }
+
+        return;
+    }
     orig<&PlayLayer_pushButton>(self, idk, button);
 }
 
